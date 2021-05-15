@@ -262,7 +262,8 @@ func (d *Dynamo) CreateOrUpdateCart(userID string, productID string, delta int) 
 			// the cart is not found
 			// we have to create it
 			cartFound = cart.Cart{
-				Version: 1,
+				CurrencyCode: "EUR",
+				Version:      1,
 			}
 			err = d.CreateCart(cartFound, userID)
 			if err != nil {
@@ -272,16 +273,19 @@ func (d *Dynamo) CreateOrUpdateCart(userID string, productID string, delta int) 
 			return cart.Cart{}, fmt.Errorf("impossible to retrieve the cart: %w", err)
 		}
 	}
-	// next is to add/ remove the item from the cart
-	err = cartFound.UpsertItem(productID, delta)
-	if err != nil {
-		return cart.Cart{}, fmt.Errorf("impossible to add/remove item to the cart: %w", err)
-	}
 	productDB, err := d.getProductByID(productID)
 	if err != nil {
 		return cart.Cart{}, fmt.Errorf("impossible to retrieve the product of id %s: %w", productID, err)
 	}
-
+	// next is to add/ remove the item from the cart
+	err = cartFound.UpsertItem(productDB, delta)
+	if err != nil {
+		return cart.Cart{}, fmt.Errorf("impossible to add/remove item to the cart: %w", err)
+	}
+	err = cartFound.ComputePrices()
+	if err != nil {
+		return cart.Cart{}, fmt.Errorf("impossible to compute prices: %w", err)
+	}
 	// slice of actions in the transaction
 	actions := make([]*dynamodb.TransactWriteItem, 0)
 	// update stock query
