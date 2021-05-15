@@ -37,6 +37,7 @@ func main() {
 				VAT:              money.New(200, "EUR"),
 			},
 		}
+		c.Header("Access-Control-Allow-Origin", "http://localhost:8080")
 		c.JSON(200, products)
 	})
 	r.Run(":9090") // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
