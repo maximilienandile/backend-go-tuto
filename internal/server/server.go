@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/maximilienandile/backend-go-tuto/internal/storage"
+
 	"github.com/Rhymond/go-money"
 	"github.com/maximilienandile/backend-go-tuto/internal/product"
 
@@ -15,11 +17,13 @@ type Server struct {
 	Engine        *gin.Engine
 	port          uint
 	allowedOrigin string
+	storage       *storage.Dynamo
 }
 
 type Config struct {
 	Port          uint
 	AllowedOrigin string
+	Storage       *storage.Dynamo
 }
 
 func New(config Config) (*Server, error) {
@@ -28,6 +32,7 @@ func New(config Config) (*Server, error) {
 		Engine:        engine,
 		port:          config.Port,
 		allowedOrigin: config.AllowedOrigin,
+		storage:       config.Storage,
 	}
 	engine.Use(s.CORSMiddleware, s.MiddlewareServerModel, s.CheckRequest)
 	// Create a new middleware
@@ -36,6 +41,7 @@ func New(config Config) (*Server, error) {
 	// Header value should be : Gin
 	engine.GET("/categories", s.Categories)
 	engine.GET("/products", s.Products)
+	engine.POST("/admin/products", s.CreateProduct)
 	return s, nil
 }
 
@@ -140,4 +146,8 @@ func (s *Server) Products(c *gin.Context) {
 		},
 	}
 	c.JSON(200, products)
+}
+
+func (s *Server) CreateProduct(c *gin.Context) {
+	// TODO
 }

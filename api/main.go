@@ -23,13 +23,14 @@ func init() {
 	if !found {
 		log.Fatal("env variable ALLOWED_ORIGIN was not found")
 	}
-	storage, err := storage.NewDynamo("ecommerce-dev")
+	dynamoStorage, err := storage.NewDynamo("ecommerce-dev")
 	if err != nil {
 		log.Fatalf("impossible to create storage interface: %s", err)
 	}
 	myServer, err := server.New(server.Config{
 		Port:          9090,
 		AllowedOrigin: allowedOrigin,
+		Storage:       dynamoStorage,
 	})
 	if err != nil {
 		log.Fatalf("impossible to create the server: %s", err)
