@@ -24,6 +24,7 @@ func main() {
 		})
 	})
 	r.GET("/categories", myServer.Categories)
+	// TODO : do the same as /categories for this endpoint
 	r.GET("/products", func(c *gin.Context) {
 		products := []product.Product{
 			{
