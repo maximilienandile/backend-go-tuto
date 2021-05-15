@@ -13,5 +13,10 @@ type Parameters struct {
 		AuthProviderX509CertUrl string `json:"auth_provider_x509_cert_url"`
 		ClientX509CertUrl       string `json:"client_x509_cert_url"`
 	} `json:"google"`
-	StripeSecretKey string `json:"stripe_secret_key"`
+	Stripe Stripe `json:"stripe"`
+}
+
+type Stripe struct {
+	SecretKey     string `json:"secret_key"`
+	SigningSecret string `json:"signing_secret"`
 }

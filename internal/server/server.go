@@ -21,37 +21,40 @@ import (
 )
 
 type Server struct {
-	Engine             *gin.Engine
-	port               uint
-	allowedOrigin      string
-	storage            storage.Storage
-	uniqueIDGenerator  uniqueid.Generator
-	firebaseAuthClient *auth.Client
-	stripeSecretKey    string
-	frontendBaseUrl    string
+	Engine                        *gin.Engine
+	port                          uint
+	allowedOrigin                 string
+	storage                       storage.Storage
+	uniqueIDGenerator             uniqueid.Generator
+	firebaseAuthClient            *auth.Client
+	stripeSecretKey               string
+	stripeWebhookSigningSecretKey string
+	frontendBaseUrl               string
 }
 
 type Config struct {
-	Port               uint
-	AllowedOrigin      string
-	Storage            storage.Storage
-	UniqueIDGenerator  uniqueid.Generator
-	FirebaseAuthClient *auth.Client
-	StripeSecretKey    string
-	FrontendBaseUrl    string
+	Port                          uint
+	AllowedOrigin                 string
+	Storage                       storage.Storage
+	UniqueIDGenerator             uniqueid.Generator
+	FirebaseAuthClient            *auth.Client
+	StripeSecretKey               string
+	StripeWebhookSigningSecretKey string
+	FrontendBaseUrl               string
 }
 
 func New(config Config) (*Server, error) {
 	engine := gin.Default()
 	s := &Server{
-		Engine:             engine,
-		port:               config.Port,
-		allowedOrigin:      config.AllowedOrigin,
-		storage:            config.Storage,
-		uniqueIDGenerator:  config.UniqueIDGenerator,
-		firebaseAuthClient: config.FirebaseAuthClient,
-		stripeSecretKey:    config.StripeSecretKey,
-		frontendBaseUrl:    config.FrontendBaseUrl,
+		Engine:                        engine,
+		port:                          config.Port,
+		allowedOrigin:                 config.AllowedOrigin,
+		storage:                       config.Storage,
+		uniqueIDGenerator:             config.UniqueIDGenerator,
+		firebaseAuthClient:            config.FirebaseAuthClient,
+		stripeSecretKey:               config.StripeSecretKey,
+		stripeWebhookSigningSecretKey: config.StripeWebhookSigningSecretKey,
+		frontendBaseUrl:               config.FrontendBaseUrl,
 	}
 	engine.Use(s.CORSMiddleware, s.MiddlewareServerModel)
 	// Create a new middleware
@@ -68,6 +71,7 @@ func New(config Config) (*Server, error) {
 	engine.GET("/me/cart", s.AuthenticateV2, s.GetCartOfUser)
 	engine.PUT("/me/cart", s.AuthenticateV2, s.UpdateCartOfUser)
 	engine.POST("/checkout", s.AuthenticateV2, s.Checkout)
+	engine.POST("/webhooks/stripe", s.HandleStripeWebhook)
 	return s, nil
 }
 

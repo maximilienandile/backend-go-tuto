@@ -77,13 +77,14 @@ func init() {
 	}
 
 	myServer, err := server.New(server.Config{
-		Port:               9090,
-		AllowedOrigin:      allowedOrigin,
-		Storage:            dynamoStorage,
-		UniqueIDGenerator:  uniqueid.UUIDV4{},
-		FirebaseAuthClient: authClient,
-		StripeSecretKey:    secretsFromSSM.StripeSecretKey,
-		FrontendBaseUrl:    frontendBaseURL,
+		Port:                          9090,
+		AllowedOrigin:                 allowedOrigin,
+		Storage:                       dynamoStorage,
+		UniqueIDGenerator:             uniqueid.UUIDV4{},
+		FirebaseAuthClient:            authClient,
+		StripeSecretKey:               secretsFromSSM.Stripe.SecretKey,
+		StripeWebhookSigningSecretKey: secretsFromSSM.Stripe.SigningSecret,
+		FrontendBaseUrl:               frontendBaseURL,
 	})
 	if err != nil {
 		log.Fatalf("impossible to create the server: %s", err)

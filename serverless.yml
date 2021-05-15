@@ -104,3 +104,6 @@ functions:
               - X-Amz-Security-Token
               - X-Amz-User-Agent
             allowCredentials: false
+      - http:
+          path: /webhooks/stripe
+          method: post
