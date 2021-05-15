@@ -1,14 +1,28 @@
 package cart
 
-import "github.com/Rhymond/go-money"
+import (
+	"fmt"
+
+	"github.com/Rhymond/go-money"
+)
 
 type Cart struct {
-	ID    string
-	Items []Item
+	ID           string
+	CurrencyCode string
+	Items        []Item
 }
 
-func (c Cart) TotalPrice() (*money.Money, error) {
-
+func (c Cart) TotalPriceVATInc() (*money.Money, error) {
+	totalPrice := money.New(0, c.CurrencyCode)
+	for _, item := range c.Items {
+		itemPrice := item.UnitPriceVATInc.Multiply(int64(item.Quantity))
+		var err error
+		totalPrice, err = totalPrice.Add(itemPrice)
+		if err != nil {
+			return nil, fmt.Errorf("impossible to add item price to total price: %w", err)
+		}
+	}
+	return totalPrice, nil
 }
 
 type Item struct {
