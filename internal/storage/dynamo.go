@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/maximilienandile/backend-go-tuto/internal/category"
@@ -19,6 +20,8 @@ const partitionKeyAttributeName = "PK"
 const sortKeyAttributeName = "SK"
 const pkProduct = "product"
 const pkCategory = "category"
+
+var ErrNotFound = errors.New("element not found")
 
 type Dynamo struct {
 	tableName  string
@@ -130,4 +133,85 @@ func (d *Dynamo) getElementsByPK(pkAttributeValue string) (*dynamodb.QueryOutput
 		return nil, fmt.Errorf("impossible to query database: %s", err)
 	}
 	return out, nil
+}
+
+func (d *Dynamo) getElementsByPkandSk(pkAttributeValue string, skAttributeValue string) (map[string]*dynamodb.AttributeValue, error) {
+	result, err := d.client.GetItem(&dynamodb.GetItemInput{
+		TableName: aws.String(d.tableName),
+		Key: map[string]*dynamodb.AttributeValue{
+			partitionKeyAttributeName: {
+				S: aws.String(pkAttributeValue),
+			},
+			sortKeyAttributeName: {
+				S: aws.String(skAttributeValue),
+			},
+		},
+	})
+	if err != nil {
+		return nil, err
+	}
+	if len(result.Item) == 0 {
+		return nil, ErrNotFound
+	}
+	return result.Item, nil
+}
+
+func (d *Dynamo) getProductByID(productID string) (product.Product, error) {
+	p := product.Product{}
+	item, err := d.getElementsByPkandSk(pkProduct, productID)
+	if err != nil {
+		return p, err
+	}
+	err = dynamodbattribute.UnmarshalMap(item, &p)
+	if err != nil {
+		return p, err
+	}
+	return p, nil
+}
+
+func (d *Dynamo) UpdateInventory(productID string, delta int) error {
+	// first read product by id
+	// to retrieve current stock
+	productDB, err := d.getProductByID(productID)
+	if err != nil {
+		return fmt.Errorf("impossible to retrieve product with id '%s': %s", productID, err)
+	}
+	// new stock
+	newStockValue := int(productDB.Stock) + delta
+	if newStockValue < 0 {
+		return fmt.Errorf("impossible to have a stock that is less than 0, actual in db %d, delta %d, newValue %d", productDB.Stock, delta, newStockValue)
+	}
+	// Build Update Item
+	// KEY Condition
+	// 		PK = product
+	// 		SK = productID
+	keyCondition := map[string]*dynamodb.AttributeValue{}
+	keyCondition[partitionKeyAttributeName] = &dynamodb.AttributeValue{S: aws.String(pkProduct)}
+	keyCondition[sortKeyAttributeName] = &dynamodb.AttributeValue{S: aws.String(productID)}
+	// Condition
+	condition := expression.Name("version").Equal(expression.Value(productDB.Version))
+	// Update (what needs to be updated ?)
+	// update the stock
+	update := expression.Set(expression.Name("stock"), expression.Value(int(productDB.Stock)+delta))
+	// increment the version
+	update = update.Set(expression.Name("version"), expression.Value(productDB.Version+1))
+
+	builder := expression.NewBuilder().WithCondition(condition).WithUpdate(update)
+	expr, err := builder.Build()
+	if err != nil {
+		return fmt.Errorf("impossible to build expression: %s", err)
+	}
+	input := dynamodb.UpdateItemInput{
+		Key:                       keyCondition,
+		ConditionExpression:       expr.Condition(),
+		ExpressionAttributeNames:  expr.Names(),
+		ExpressionAttributeValues: expr.Values(),
+		UpdateExpression:          expr.Update(),
+		TableName:                 &d.tableName,
+	}
+	_, err = d.client.UpdateItem(&input)
+	if err != nil {
+		return fmt.Errorf("impossible to query database: %s", err)
+	}
+	return nil
 }

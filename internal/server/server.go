@@ -48,6 +48,8 @@ func New(config Config) (*Server, error) {
 	engine.GET("/products", s.Products)
 	engine.POST("/admin/products", s.CreateProduct)
 	engine.POST("/admin/categories", s.CreateCategories)
+	// inventory
+	engine.PUT("/admin/inventory", s.UpdateInventory)
 	return s, nil
 }
 
@@ -100,6 +102,7 @@ func (s *Server) CreateProduct(c *gin.Context) {
 		return
 	}
 	productToAdd.ID = s.uniqueIDGenerator.Generate()
+	productToAdd.Version = 1
 	err = s.storage.CreateProduct(productToAdd)
 	if err != nil {
 		//

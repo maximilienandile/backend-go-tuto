@@ -10,4 +10,5 @@ type Storage interface {
 	Products() ([]product.Product, error)
 	CreateCategory(category category.Category) error
 	Categories() ([]category.Category, error)
+	UpdateInventory(productID string, delta int) error
 }
