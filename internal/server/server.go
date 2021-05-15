@@ -48,6 +48,7 @@ func New(config Config) (*Server, error) {
 	engine.GET("/products", s.Products)
 	engine.POST("/admin/products", s.CreateProduct)
 	engine.POST("/admin/categories", s.CreateCategories)
+	engine.PUT("/admin/inventory", s.UpdateInventory)
 	return s, nil
 }
 

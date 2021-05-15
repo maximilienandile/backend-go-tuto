@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/maximilienandile/backend-go-tuto/internal/category"
@@ -130,4 +131,9 @@ func (d *Dynamo) getElementsByPK(pkAttributeValue string) (*dynamodb.QueryOutput
 		return nil, fmt.Errorf("impossible to query database: %s", err)
 	}
 	return out, nil
+}
+
+func (d *Dynamo) UpdateInventory(productID string, delta int) error {
+	// TODO : implement that
+	return errors.New("not implemented")
 }

@@ -11,6 +11,10 @@ type Product struct {
 	PriceVATExcluded Amount `json:"priceVatExcluded"`
 	VAT              Amount `json:"vat"`
 	TotalPrice       Amount `json:"totalPrice"`
+	// inventory
+	Stock    uint `json:"stock"`
+	Reserved uint `json:"reserved"`
+	Version  uint `json:"version"`
 }
 
 type Amount struct {
