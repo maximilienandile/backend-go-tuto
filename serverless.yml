@@ -5,10 +5,11 @@ provider:
   region: eu-west-1
   environment:
     FRONTEND_BASE_URL: ${opt:frontendBaseUrl}
-    ALLOWED_ORIGIN: ${opt:allowedOrigin}
+    ALLOWED_ORIGIN: ${opt:allowedOrigins}
     PARAMETER_STORE_NAME: /ecommerce/${opt:stage}/secrets
     EMAIL_FROM: ${opt:emailFrom}
     ADMIN_EMAILS: ${opt:adminEmails}
+    DYNAMODB_TABLE_NAME: ecommerce-${opt:stage}
   iam:
     role:
       statements:

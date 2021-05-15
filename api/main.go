@@ -39,7 +39,11 @@ func init() {
 	if !found {
 		log.Fatal("env variable ALLOWED_ORIGIN was not found")
 	}
-	dynamoStorage, err := storage.NewDynamo("ecommerce-dev")
+	dynamoDbTableName, found := os.LookupEnv("DYNAMODB_TABLE_NAME")
+	if !found {
+		log.Fatal("env variable DYNAMODB_TABLE_NAME was not found")
+	}
+	dynamoStorage, err := storage.NewDynamo(dynamoDbTableName)
 	if err != nil {
 		log.Fatalf("impossible to create storage interface: %s", err)
 	}

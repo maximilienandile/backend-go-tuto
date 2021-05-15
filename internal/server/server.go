@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/maximilienandile/backend-go-tuto/internal/email"
 
@@ -94,7 +95,18 @@ func (s *Server) Run() error {
 }
 
 func (s Server) CORSMiddleware(c *gin.Context) {
-	c.Header("Access-Control-Allow-Origin", s.allowedOrigin)
+	allowedOrigins := strings.Split(s.allowedOrigin, ",")
+	originFromReq := c.GetHeader("Origin")
+	var isAllowedOrigin bool
+	for _, origin := range allowedOrigins {
+		if originFromReq == origin {
+			isAllowedOrigin = true
+			break
+		}
+	}
+	if isAllowedOrigin {
+		c.Header("Access-Control-Allow-Origin", originFromReq)
+	}
 }
 
 func (s Server) MiddlewareServerModel(c *gin.Context) {
