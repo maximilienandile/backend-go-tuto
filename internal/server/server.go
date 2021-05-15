@@ -67,10 +67,6 @@ func (s Server) MiddlewareServerModel(c *gin.Context) {
 	c.Header("X-Server-Model", "Gin")
 }
 
-func (s Server) Authenticate(c *gin.Context) {
-
-}
-
 func (s *Server) Categories(c *gin.Context) {
 	categories, err := s.storage.Categories()
 	if err != nil {

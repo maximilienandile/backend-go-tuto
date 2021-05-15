@@ -50,3 +50,9 @@ functions:
       - http:
           path: /admin/product/{productId}
           method: put
+      - http:
+          path: /me/cart
+          method: get
+      - http:
+          path: /me/cart
+          method: get
