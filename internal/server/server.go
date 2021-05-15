@@ -33,6 +33,7 @@ type Server struct {
 	stripeWebhookSigningSecretKey string
 	frontendBaseUrl               string
 	emailSender                   email.Sender
+	emailFrom                     string
 }
 
 type Config struct {
@@ -45,6 +46,7 @@ type Config struct {
 	StripeWebhookSigningSecretKey string
 	FrontendBaseUrl               string
 	EmailSender                   email.Sender
+	EmailFrom                     string
 }
 
 func New(config Config) (*Server, error) {
@@ -60,6 +62,7 @@ func New(config Config) (*Server, error) {
 		stripeWebhookSigningSecretKey: config.StripeWebhookSigningSecretKey,
 		frontendBaseUrl:               config.FrontendBaseUrl,
 		emailSender:                   config.EmailSender,
+		emailFrom:                     config.EmailFrom,
 	}
 	engine.Use(s.CORSMiddleware, s.MiddlewareServerModel)
 	// Create a new middleware

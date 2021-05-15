@@ -5,6 +5,8 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/maximilienandile/backend-go-tuto/internal/email"
+
 	"github.com/stripe/stripe-go/v72"
 
 	"github.com/stripe/stripe-go/v72/webhook"
@@ -61,6 +63,33 @@ func (s Server) HandleStripeWebhook(c *gin.Context) {
 			c.AbortWithStatus(http.StatusInternalServerError)
 			return
 		}
+
+		input := email.OrderConfirmationEmailInput{
+			ProductName: "Gopher E-commerce",
+			StoreLink:   s.frontendBaseUrl,
+			LogoURL:     "http://www.duchess-france.org/wp-content/uploads/2016/01/gopher.png",
+			OrderItems:  sessionRetrieved.Cart.Items,
+		}
+		// prepare the order confirmation email
+		confirmationEmail, err := email.NewOrderConfirmationEmail(input)
+		if err != nil {
+			log.Printf("impossible to generate confirmation email: %s", err)
+			c.AbortWithStatus(http.StatusInternalServerError)
+			return
+		}
+		err = s.emailSender.Send(email.SendInput{
+			ToAddress:   checkoutSession.Customer.Email,
+			FromAddress: s.emailFrom,
+			HtmlBody:    confirmationEmail.BodyAsHTML,
+			TextBody:    confirmationEmail.BodyAsText,
+			Subject:     "Order Confirmed",
+		})
+		if err != nil {
+			log.Printf("impossible to send email: %s", err)
+			c.AbortWithStatus(http.StatusInternalServerError)
+			return
+		}
+
 	}
 
 }

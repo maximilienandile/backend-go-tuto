@@ -82,6 +82,11 @@ func init() {
 		log.Fatalf("impossible to create email sender: %s", err)
 	}
 
+	emailFrom, found := os.LookupEnv("EMAIL_FROM")
+	if !found {
+		log.Fatal("env variable EMAIL_FROM was not found")
+	}
+
 	myServer, err := server.New(server.Config{
 		Port:                          9090,
 		AllowedOrigin:                 allowedOrigin,
@@ -92,6 +97,7 @@ func init() {
 		StripeWebhookSigningSecretKey: secretsFromSSM.Stripe.SigningSecret,
 		FrontendBaseUrl:               frontendBaseURL,
 		EmailSender:                   emailSender,
+		EmailFrom:                     emailFrom,
 	})
 	if err != nil {
 		log.Fatalf("impossible to create the server: %s", err)
