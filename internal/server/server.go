@@ -53,27 +53,62 @@ func (s *Server) Categories(c *gin.Context) {
 }
 
 func (s *Server) Products(c *gin.Context) {
+	twoEuro := money.New(200, "EUR")
+	fourEuros := money.New(400, "EUR")
 	products := []product.Product{
 		{
 			ID:               "42",
 			Name:             "Test",
+			ShortDescription: "New",
 			Description:      "This is my product",
-			PriceVATExcluded: money.New(100, "EUR"),
-			VAT:              money.New(200, "EUR"),
+			PriceVATExcluded: product.Amount{
+				Money:   twoEuro,
+				Display: twoEuro.Display(),
+			},
+			VAT: product.Amount{
+				Money:   twoEuro,
+				Display: twoEuro.Display(),
+			},
+			TotalPrice: product.Amount{
+				Money:   fourEuros,
+				Display: fourEuros.Display(),
+			},
 		},
 		{
 			ID:               "43",
 			Name:             "Test",
 			Description:      "This is my product",
-			PriceVATExcluded: money.New(100, "EUR"),
-			VAT:              money.New(250, "EUR"),
+			ShortDescription: "New",
+			PriceVATExcluded: product.Amount{
+				Money:   twoEuro,
+				Display: twoEuro.Display(),
+			},
+			VAT: product.Amount{
+				Money:   twoEuro,
+				Display: twoEuro.Display(),
+			},
+			TotalPrice: product.Amount{
+				Money:   fourEuros,
+				Display: fourEuros.Display(),
+			},
 		},
 		{
 			ID:               "44",
 			Name:             "Test",
+			ShortDescription: "on Sale !",
 			Description:      "This is my product",
-			PriceVATExcluded: money.New(189, "EUR"),
-			VAT:              money.New(200, "EUR"),
+			PriceVATExcluded: product.Amount{
+				Money:   twoEuro,
+				Display: twoEuro.Display(),
+			},
+			VAT: product.Amount{
+				Money:   twoEuro,
+				Display: twoEuro.Display(),
+			},
+			TotalPrice: product.Amount{
+				Money:   fourEuros,
+				Display: fourEuros.Display(),
+			},
 		},
 	}
 	c.Header("Access-Control-Allow-Origin", "http://localhost:8080")
