@@ -20,5 +20,20 @@ func (s Server) Checkout(c *gin.Context) {
 		log.Printf("error while binding JSON: %s \n", err)
 		return
 	}
+	// retrieve current user
+	currentUser, err := s.currentUser(c)
+	if err != nil {
+		log.Printf("impossible to retrieve current user: %s", err)
+		c.AbortWithStatus(http.StatusForbidden)
+		return
+	}
+	// retrieve cart of the current user
+	cartRetrieved, err := s.storage.GetCart(currentUser.ID)
+	if err != nil {
+		log.Printf("impossible to retrieve cart of current user: %s", err)
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+	log.Println(cartRetrieved)
 	c.Status(http.StatusOK)
 }
