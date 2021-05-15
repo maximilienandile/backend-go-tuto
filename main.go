@@ -7,7 +7,9 @@ import (
 )
 
 func main() {
-	myServer, err := server.New(server.Config{})
+	myServer, err := server.New(server.Config{
+		Port: 9090,
+	})
 	if err != nil {
 		log.Fatalf("impossible to create the server: %s", err)
 	}

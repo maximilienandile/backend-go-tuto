@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/Rhymond/go-money"
@@ -12,15 +13,18 @@ import (
 
 type Server struct {
 	engine *gin.Engine
+	port   uint
 }
 
 type Config struct {
+	Port uint
 }
 
 func New(config Config) (*Server, error) {
 	engine := gin.Default()
 	s := &Server{
 		engine: engine,
+		port:   config.Port,
 	}
 	engine.GET("/categories", s.Categories)
 	engine.GET("/products", s.Products)
@@ -28,7 +32,7 @@ func New(config Config) (*Server, error) {
 }
 
 func (s *Server) Run() error {
-	return s.engine.Run(":9090")
+	return s.engine.Run(fmt.Sprintf(":%d", s.port))
 }
 
 func (s *Server) Categories(c *gin.Context) {
