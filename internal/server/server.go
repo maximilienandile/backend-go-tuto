@@ -59,6 +59,7 @@ func (s *Server) Products(c *gin.Context) {
 		{
 			ID:               "42",
 			Name:             "Test",
+			Image:            "https://www.practical-go-lessons.com/img/practical-go-lessons-book10.a8a05387.jpg",
 			ShortDescription: "New",
 			Description:      "This is my product",
 			PriceVATExcluded: product.Amount{
@@ -78,6 +79,7 @@ func (s *Server) Products(c *gin.Context) {
 			ID:               "43",
 			Name:             "Test",
 			Description:      "This is my product",
+			Image:            "https://www.practical-go-lessons.com/img/practical-go-lessons-book10.a8a05387.jpg",
 			ShortDescription: "New",
 			PriceVATExcluded: product.Amount{
 				Money:   twoEuro,
@@ -95,6 +97,7 @@ func (s *Server) Products(c *gin.Context) {
 		{
 			ID:               "44",
 			Name:             "Test",
+			Image:            "https://www.practical-go-lessons.com/img/practical-go-lessons-book10.a8a05387.jpg",
 			ShortDescription: "on Sale !",
 			Description:      "This is my product",
 			PriceVATExcluded: product.Amount{
