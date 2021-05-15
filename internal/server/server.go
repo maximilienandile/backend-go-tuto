@@ -29,6 +29,11 @@ func New(config Config) (*Server, error) {
 		port:          config.Port,
 		allowedOrigin: config.AllowedOrigin,
 	}
+	engine.Use(s.CORSMiddleware)
+	// Create a new middleware
+	// this middleware add a Header to the response
+	// Header Name : X-Server-Model
+	// Header value should be : Gin
 	engine.GET("/categories", s.Categories)
 	engine.GET("/products", s.Products)
 	return s, nil
@@ -36,6 +41,10 @@ func New(config Config) (*Server, error) {
 
 func (s *Server) Run() error {
 	return s.Engine.Run(fmt.Sprintf(":%d", s.port))
+}
+
+func (s Server) CORSMiddleware(c *gin.Context) {
+	c.Header("Access-Control-Allow-Origin", s.allowedOrigin)
 }
 
 func (s *Server) Categories(c *gin.Context) {
@@ -51,7 +60,6 @@ func (s *Server) Categories(c *gin.Context) {
 			Description: "kdsjdjsidjisdj",
 		},
 	}
-	c.Header("Access-Control-Allow-Origin", s.allowedOrigin)
 	c.JSON(http.StatusOK, categories)
 }
 
@@ -117,6 +125,5 @@ func (s *Server) Products(c *gin.Context) {
 			},
 		},
 	}
-	c.Header("Access-Control-Allow-Origin", s.allowedOrigin)
 	c.JSON(200, products)
 }
