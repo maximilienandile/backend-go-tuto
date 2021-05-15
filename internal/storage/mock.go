@@ -8,6 +8,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
+	cart "github.com/maximilienandile/backend-go-tuto/internal/cart"
 	category "github.com/maximilienandile/backend-go-tuto/internal/category"
 	product "github.com/maximilienandile/backend-go-tuto/internal/product"
 )
@@ -50,6 +51,20 @@ func (mr *MockStorageMockRecorder) Categories() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Categories", reflect.TypeOf((*MockStorage)(nil).Categories))
 }
 
+// CreateCart mocks base method.
+func (m *MockStorage) CreateCart(cart cart.Cart, userID string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateCart", cart, userID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreateCart indicates an expected call of CreateCart.
+func (mr *MockStorageMockRecorder) CreateCart(cart, userID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateCart", reflect.TypeOf((*MockStorage)(nil).CreateCart), cart, userID)
+}
+
 // CreateCategory mocks base method.
 func (m *MockStorage) CreateCategory(category category.Category) error {
 	m.ctrl.T.Helper()
@@ -76,6 +91,21 @@ func (m *MockStorage) CreateProduct(product product.Product) error {
 func (mr *MockStorageMockRecorder) CreateProduct(product interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateProduct", reflect.TypeOf((*MockStorage)(nil).CreateProduct), product)
+}
+
+// GetCart mocks base method.
+func (m *MockStorage) GetCart(userID string) (cart.Cart, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCart", userID)
+	ret0, _ := ret[0].(cart.Cart)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCart indicates an expected call of GetCart.
+func (mr *MockStorageMockRecorder) GetCart(userID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCart", reflect.TypeOf((*MockStorage)(nil).GetCart), userID)
 }
 
 // Products mocks base method.

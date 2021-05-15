@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"github.com/maximilienandile/backend-go-tuto/internal/cart"
 	"github.com/maximilienandile/backend-go-tuto/internal/category"
 	"github.com/maximilienandile/backend-go-tuto/internal/product"
 )
@@ -23,4 +24,6 @@ type Storage interface {
 	Categories() ([]category.Category, error)
 	UpdateInventory(productID string, delta int) error
 	UpdateProduct(input UpdateProductInput) error
+	CreateCart(cart cart.Cart, userID string) error
+	GetCart(userID string) (cart.Cart, error)
 }
