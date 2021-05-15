@@ -6,6 +6,8 @@ import (
 	"log"
 	"os"
 
+	"github.com/maximilienandile/backend-go-tuto/internal/email"
+
 	"google.golang.org/api/option"
 
 	firebase "firebase.google.com/go/v4"
@@ -75,6 +77,10 @@ func init() {
 	if !found {
 		log.Fatal("env variable FRONTEND_BASE_URL was not found")
 	}
+	emailSender, err := email.NewSimpleEmailSender()
+	if err != nil {
+		log.Fatalf("impossible to create email sender: %s", err)
+	}
 
 	myServer, err := server.New(server.Config{
 		Port:                          9090,
@@ -85,6 +91,7 @@ func init() {
 		StripeSecretKey:               secretsFromSSM.Stripe.SecretKey,
 		StripeWebhookSigningSecretKey: secretsFromSSM.Stripe.SigningSecret,
 		FrontendBaseUrl:               frontendBaseURL,
+		EmailSender:                   emailSender,
 	})
 	if err != nil {
 		log.Fatalf("impossible to create the server: %s", err)

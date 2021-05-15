@@ -6,6 +6,8 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/maximilienandile/backend-go-tuto/internal/email"
+
 	"firebase.google.com/go/v4/auth"
 
 	"github.com/maximilienandile/backend-go-tuto/internal/extMoney"
@@ -30,6 +32,7 @@ type Server struct {
 	stripeSecretKey               string
 	stripeWebhookSigningSecretKey string
 	frontendBaseUrl               string
+	emailSender                   email.Sender
 }
 
 type Config struct {
@@ -41,6 +44,7 @@ type Config struct {
 	StripeSecretKey               string
 	StripeWebhookSigningSecretKey string
 	FrontendBaseUrl               string
+	EmailSender                   email.Sender
 }
 
 func New(config Config) (*Server, error) {
@@ -55,6 +59,7 @@ func New(config Config) (*Server, error) {
 		stripeSecretKey:               config.StripeSecretKey,
 		stripeWebhookSigningSecretKey: config.StripeWebhookSigningSecretKey,
 		frontendBaseUrl:               config.FrontendBaseUrl,
+		emailSender:                   config.EmailSender,
 	}
 	engine.Use(s.CORSMiddleware, s.MiddlewareServerModel)
 	// Create a new middleware
@@ -72,6 +77,7 @@ func New(config Config) (*Server, error) {
 	engine.PUT("/me/cart", s.AuthenticateV2, s.UpdateCartOfUser)
 	engine.POST("/checkout", s.AuthenticateV2, s.Checkout)
 	engine.POST("/webhooks/stripe", s.HandleStripeWebhook)
+	engine.GET("/testEmail", s.SendTestEmail)
 	return s, nil
 }
 
@@ -200,4 +206,19 @@ func (s *Server) GetProductByID(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, productFound)
+}
+
+func (s Server) SendTestEmail(c *gin.Context) {
+	err := s.emailSender.Send(email.SendInput{
+		ToAddress:   "maximilien.andile.demo@gmail.com",
+		FromAddress: "maximilien.andile.demo@gmail.com",
+		HtmlBody:    "TEST",
+		TextBody:    "TEST",
+		Subject:     "This is a test from the backend",
+	})
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.Status(http.StatusOK)
 }
