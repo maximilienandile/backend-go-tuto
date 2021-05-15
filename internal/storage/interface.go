@@ -3,6 +3,7 @@ package storage
 import (
 	"github.com/maximilienandile/backend-go-tuto/internal/cart"
 	"github.com/maximilienandile/backend-go-tuto/internal/category"
+	"github.com/maximilienandile/backend-go-tuto/internal/extMoney"
 	"github.com/maximilienandile/backend-go-tuto/internal/product"
 )
 
@@ -12,9 +13,9 @@ type UpdateProductInput struct {
 	Image            string
 	ShortDescription string
 	Description      string
-	PriceVATExcluded product.Amount
-	VAT              product.Amount
-	TotalPrice       product.Amount
+	PriceVATExcluded extMoney.ExtMoney
+	VAT              extMoney.ExtMoney
+	TotalPrice       extMoney.ExtMoney
 }
 
 type Storage interface {

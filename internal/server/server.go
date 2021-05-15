@@ -6,6 +6,8 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/maximilienandile/backend-go-tuto/internal/extMoney"
+
 	"github.com/maximilienandile/backend-go-tuto/internal/uniqueid"
 
 	"github.com/maximilienandile/backend-go-tuto/internal/storage"
@@ -125,13 +127,13 @@ func (s *Server) CreateCategories(c *gin.Context) {
 }
 
 type UpdateProductInput struct {
-	Name             string         `json:"name"`
-	Image            string         `json:"image"`
-	ShortDescription string         `json:"shortDescription"`
-	Description      string         `json:"description"`
-	PriceVATExcluded product.Amount `json:"priceVatExcluded"`
-	VAT              product.Amount `json:"vat"`
-	TotalPrice       product.Amount `json:"totalPrice"`
+	Name             string            `json:"name"`
+	Image            string            `json:"image"`
+	ShortDescription string            `json:"shortDescription"`
+	Description      string            `json:"description"`
+	PriceVATExcluded extMoney.ExtMoney `json:"priceVatExcluded"`
+	VAT              extMoney.ExtMoney `json:"vat"`
+	TotalPrice       extMoney.ExtMoney `json:"totalPrice"`
 }
 
 func (s *Server) UpdateProduct(c *gin.Context) {

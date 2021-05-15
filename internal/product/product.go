@@ -1,16 +1,19 @@
 package product
 
-import "github.com/Rhymond/go-money"
+import (
+	"github.com/Rhymond/go-money"
+	"github.com/maximilienandile/backend-go-tuto/internal/extMoney"
+)
 
 type Product struct {
-	ID               string `json:"id"`
-	Name             string `json:"name"`
-	Image            string `json:"image"`
-	ShortDescription string `json:"shortDescription"`
-	Description      string `json:"description"`
-	PriceVATExcluded Amount `json:"priceVatExcluded"`
-	VAT              Amount `json:"vat"`
-	TotalPrice       Amount `json:"totalPrice"`
+	ID               string            `json:"id"`
+	Name             string            `json:"name"`
+	Image            string            `json:"image"`
+	ShortDescription string            `json:"shortDescription"`
+	Description      string            `json:"description"`
+	PriceVATExcluded extMoney.ExtMoney `json:"priceVatExcluded"`
+	VAT              extMoney.ExtMoney `json:"vat"`
+	TotalPrice       extMoney.ExtMoney `json:"totalPrice"`
 	// inventory
 	Stock    uint `json:"stock"`
 	Reserved uint `json:"reserved"`
