@@ -1,37 +1,29 @@
 package main
 
 import (
-	"net/http"
+	"log"
+
+	"github.com/maximilienandile/backend-go-tuto/internal/server"
 
 	"github.com/Rhymond/go-money"
 	"github.com/gin-gonic/gin"
-	"github.com/maximilienandile/backend-go-tuto/internal/category"
 	"github.com/maximilienandile/backend-go-tuto/internal/product"
 )
 
 func main() {
+
+	myServer, err := server.New(server.Config{})
+	if err != nil {
+		log.Fatalf("impossible to create the server: %s", err)
+	}
+
 	r := gin.Default()
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"hello": "world",
 		})
 	})
-	r.GET("/categories", func(c *gin.Context) {
-		categories := []category.Category{
-			{
-				ID:          "42",
-				Name:        "Plushies",
-				Description: "kdsjdjsidjisdj",
-			},
-			{
-				ID:          "43",
-				Name:        "T-Shirts",
-				Description: "kdsjdjsidjisdj",
-			},
-		}
-		c.Header("Access-Control-Allow-Origin", "http://localhost:8080")
-		c.JSON(http.StatusOK, categories)
-	})
+	r.GET("/categories", myServer.Categories)
 	r.GET("/products", func(c *gin.Context) {
 		products := []product.Product{
 			{
