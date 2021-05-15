@@ -65,22 +65,9 @@ func (d *Dynamo) CreateProduct(product product.Product) error {
 }
 
 func (d *Dynamo) Products() ([]product.Product, error) {
-	// PK = :myValue
-	keyCondition := expression.Key(partitionKeyAttributeName).Equal(expression.Value(pkProduct))
-	builder := expression.NewBuilder().WithKeyCondition(keyCondition)
-	expr, err := builder.Build()
+	out, err := d.getElementsByPK(pkProduct)
 	if err != nil {
-		return nil, fmt.Errorf("impossible to build expression: %s", err)
-	}
-	input := dynamodb.QueryInput{
-		KeyConditionExpression:    expr.KeyCondition(),
-		ExpressionAttributeNames:  expr.Names(),
-		ExpressionAttributeValues: expr.Values(),
-		TableName:                 &d.tableName,
-	}
-	out, err := d.client.Query(&input)
-	if err != nil {
-		return nil, fmt.Errorf("impossible to query database: %s", err)
+		return nil, fmt.Errorf("impossible to retrieve elements by PK: %w", err)
 	}
 	products := make([]product.Product, 0)
 	err = dynamodbattribute.UnmarshalListOfMaps(out.Items, &products)
@@ -109,4 +96,38 @@ func (d *Dynamo) CreateCategory(category category.Category) error {
 		return fmt.Errorf("impossible to Put item in db: %w", err)
 	}
 	return nil
+}
+
+func (d *Dynamo) Categories() ([]category.Category, error) {
+	out, err := d.getElementsByPK(pkCategory)
+	if err != nil {
+		return nil, fmt.Errorf("impossible to retrieve elements by PK: %w", err)
+	}
+	categories := make([]category.Category, 0)
+	err = dynamodbattribute.UnmarshalListOfMaps(out.Items, &categories)
+	if err != nil {
+		return nil, fmt.Errorf("impossible to unmarshall results: %w", err)
+	}
+	return categories, nil
+}
+
+func (d *Dynamo) getElementsByPK(pkAttributeValue string) (*dynamodb.QueryOutput, error) {
+	// PK = :myValue
+	keyCondition := expression.Key(partitionKeyAttributeName).Equal(expression.Value(pkAttributeValue))
+	builder := expression.NewBuilder().WithKeyCondition(keyCondition)
+	expr, err := builder.Build()
+	if err != nil {
+		return nil, fmt.Errorf("impossible to build expression: %s", err)
+	}
+	input := dynamodb.QueryInput{
+		KeyConditionExpression:    expr.KeyCondition(),
+		ExpressionAttributeNames:  expr.Names(),
+		ExpressionAttributeValues: expr.Values(),
+		TableName:                 &d.tableName,
+	}
+	out, err := d.client.Query(&input)
+	if err != nil {
+		return nil, fmt.Errorf("impossible to query database: %s", err)
+	}
+	return out, nil
 }

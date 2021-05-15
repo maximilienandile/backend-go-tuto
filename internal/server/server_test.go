@@ -94,3 +94,36 @@ func TestServer_CreateCategory(t *testing.T) {
 	assert.Equal(t, string(expectedCategory), recorder.Body.String())
 
 }
+
+func TestServer_Categories(t *testing.T) {
+	// GIVEN
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	mockedStorage := storage.NewMockStorage(ctrl)
+	mockedUniqueIDGenerator := uniqueid.NewMockGenerator(ctrl)
+	testServer, err := New(Config{
+		Port:              8080,
+		Storage:           mockedStorage,
+		UniqueIDGenerator: mockedUniqueIDGenerator,
+	})
+	req, err := http.NewRequest("GET", "/categories", nil)
+	assert.NoError(t, err, "no error should happen when building the request")
+	req.Header.Add("Authorization", "ABC")
+	recorder := httptest.NewRecorder()
+	// mocks expectations
+	mockedDBResponse := []category.Category{
+		{
+			ID:          "42",
+			Name:        "Test",
+			Description: "test",
+		},
+	}
+	mockedStorage.EXPECT().Categories().Return(mockedDBResponse, nil)
+	// WHEN
+	testServer.Engine.ServeHTTP(recorder, req)
+	// THEN
+	assert.Equal(t, http.StatusOK, recorder.Code)
+	expectedBody, err := json.Marshal(mockedDBResponse)
+	assert.NoError(t, err, "no error should happen when marshalling slice of categories")
+	assert.Equal(t, expectedBody, recorder.Body.Bytes())
+}

@@ -73,17 +73,11 @@ func (s Server) CheckRequest(c *gin.Context) {
 }
 
 func (s *Server) Categories(c *gin.Context) {
-	categories := []category.Category{
-		{
-			ID:          "42",
-			Name:        "Plushies",
-			Description: "kdsjdjsidjisdj",
-		},
-		{
-			ID:          "43",
-			Name:        "T-Shirts",
-			Description: "kdsjdjsidjisdj",
-		},
+	categories, err := s.storage.Categories()
+	if err != nil {
+		log.Printf("impossible to get the products: %s", err)
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
 	}
 	c.JSON(http.StatusOK, categories)
 }

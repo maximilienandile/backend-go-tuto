@@ -9,4 +9,5 @@ type Storage interface {
 	CreateProduct(product product.Product) error
 	Products() ([]product.Product, error)
 	CreateCategory(category category.Category) error
+	Categories() ([]category.Category, error)
 }

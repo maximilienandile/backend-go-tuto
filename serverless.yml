@@ -39,3 +39,6 @@ functions:
       - http:
           path: /admin/products
           method: post
+      - http:
+          path: /admin/categories
+          method: post
