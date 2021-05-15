@@ -11,8 +11,8 @@ import (
 func TestCart_TotalPriceVATInc(t *testing.T) {
 	t.Run("nominal", func(t *testing.T) {
 		// GIVEN
-		items := []Item{
-			{
+		items := map[string]Item{
+			"42": {
 				ID:               "42",
 				ShortDescription: "A pair of socks",
 				UnitPriceVATInc:  money.New(100, "EUR"),
@@ -36,8 +36,8 @@ func TestCart_TotalPriceVATInc(t *testing.T) {
 	})
 	t.Run("nominal with quantity greater than 1 and 2 items", func(t *testing.T) {
 		// GIVEN
-		items := []Item{
-			{
+		items := map[string]Item{
+			"42": {
 				ID:               "42",
 				ShortDescription: "A pair of socks",
 				UnitPriceVATInc:  money.New(100, "EUR"),
@@ -45,7 +45,7 @@ func TestCart_TotalPriceVATInc(t *testing.T) {
 				VAT:              money.New(50, "EUR"),
 				Quantity:         1,
 			},
-			{
+			"43": {
 				ID:               "43",
 				ShortDescription: "A T-Shirt with a small gopher",
 				UnitPriceVATInc:  money.New(3480, "EUR"),
@@ -69,8 +69,8 @@ func TestCart_TotalPriceVATInc(t *testing.T) {
 		assert.Equal(t, expectedTotalPriceVATINC, actualTotalPriceVATInc)
 	})
 	t.Run("error case different currencies", func(t *testing.T) {
-		items := []Item{
-			{
+		items := map[string]Item{
+			"42": {
 				ID:               "42",
 				ShortDescription: "A pair of socks",
 				UnitPriceVATInc:  money.New(100, "USD"),

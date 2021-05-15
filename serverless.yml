@@ -47,3 +47,9 @@ functions:
       - http:
           path: /admin/inventory
           method: put
+      - http:
+          path: /me/cart
+          method: get
+      - http:
+          path: /me/cart
+          method: put

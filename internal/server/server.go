@@ -39,7 +39,7 @@ func New(config Config) (*Server, error) {
 		storage:           config.Storage,
 		uniqueIDGenerator: config.UniqueIDGenerator,
 	}
-	engine.Use(s.CORSMiddleware, s.MiddlewareServerModel, s.CheckRequest)
+	engine.Use(s.CORSMiddleware, s.MiddlewareServerModel)
 	// Create a new middleware
 	// this middleware add a Header to the response
 	// Header Name : X-Server-Model
@@ -50,6 +50,9 @@ func New(config Config) (*Server, error) {
 	engine.POST("/admin/categories", s.CreateCategories)
 	// inventory
 	engine.PUT("/admin/inventory", s.UpdateInventory)
+	// cart
+	engine.GET("/me/cart", s.Authenticate, s.GetCart)
+	engine.PUT("/me/cart", s.Authenticate, s.CreateOrUpdateCart)
 	return s, nil
 }
 
@@ -63,15 +66,6 @@ func (s Server) CORSMiddleware(c *gin.Context) {
 
 func (s Server) MiddlewareServerModel(c *gin.Context) {
 	c.Header("X-Server-Model", "Gin")
-}
-
-func (s Server) CheckRequest(c *gin.Context) {
-	authValue := c.GetHeader("Authorization")
-	if authValue != "ABC" {
-		c.AbortWithStatus(http.StatusForbidden)
-		return
-	}
-
 }
 
 func (s *Server) Categories(c *gin.Context) {

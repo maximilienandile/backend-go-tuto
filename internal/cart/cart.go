@@ -7,9 +7,12 @@ import (
 )
 
 type Cart struct {
-	ID           string
-	CurrencyCode string
-	Items        []Item
+	ID           string `json:"id"`
+	CurrencyCode string `json:"currencyCode"`
+	// key : productID
+	// Value : Item
+	Items   map[string]Item `json:"items"`
+	Version uint            `json:"version"`
 }
 
 func (c Cart) TotalPriceVATInc() (*money.Money, error) {
@@ -25,11 +28,46 @@ func (c Cart) TotalPriceVATInc() (*money.Money, error) {
 	return totalPrice, nil
 }
 
+func (c *Cart) UpsertItem(productID string, delta int) error {
+	if c.Items == nil {
+		c.Items = make(map[string]Item)
+	}
+	itemRetrieved, found := c.Items[productID]
+	if !found {
+		if delta > 0 {
+			c.Items[productID] = Item{
+				ID:               productID,
+				ShortDescription: "",
+				Quantity:         uint8(delta),
+				UnitPriceVATExc:  nil,
+				VAT:              nil,
+				UnitPriceVATInc:  nil,
+			}
+		} else {
+			return fmt.Errorf("delta is less than zero but item do not exists")
+		}
+	} else {
+		// item is in the map
+		newQuantity := int(itemRetrieved.Quantity) + delta
+		if newQuantity < 0 {
+			return fmt.Errorf("impossible to have a quantity less than zero")
+		} else if newQuantity > 0 {
+			itemRetrieved.Quantity = uint8(newQuantity)
+			c.Items[productID] = itemRetrieved
+		} else {
+			// quantity is 0
+			// remove from cart
+			delete(c.Items, productID)
+		}
+	}
+	return nil
+}
+
 type Item struct {
-	ID               string
-	ShortDescription string
-	Quantity         uint8
-	UnitPriceVATExc  *money.Money
-	VAT              *money.Money
-	UnitPriceVATInc  *money.Money
+	ID               string       `json:"id"`
+	ShortDescription string       `json:"shortDescription"`
+	Quantity         uint8        `json:"quantity"`
+	UnitPriceVATExc  *money.Money `json:"unitPriceVATExc"`
+	VAT              *money.Money `json:"vat"`
+	UnitPriceVATInc  *money.Money `json:"unitPriceVATInc"`
 }

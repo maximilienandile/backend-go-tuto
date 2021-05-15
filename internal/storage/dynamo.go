@@ -20,6 +20,7 @@ const partitionKeyAttributeName = "PK"
 const sortKeyAttributeName = "SK"
 const pkProduct = "product"
 const pkCategory = "category"
+const pkCart = "cart"
 
 var ErrNotFound = errors.New("element not found")
 
