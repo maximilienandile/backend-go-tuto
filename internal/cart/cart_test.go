@@ -3,6 +3,8 @@ package cart
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/Rhymond/go-money"
 )
 
@@ -27,16 +29,7 @@ func TestCart_TotalPriceVATInc(t *testing.T) {
 	actualTotalPrice, err := cart.TotalPriceVATInc()
 
 	// THEN
-	if err != nil {
-		t.Fail()
-	}
+	assert.NoError(t, err, "impossible to compute total price VAT included")
 	expectedTotalPrice := money.New(100, "EUR")
-	isEqual, err := expectedTotalPrice.Equals(actualTotalPrice)
-	if err != nil {
-		t.Fail()
-	}
-	if !isEqual {
-		t.Fail()
-	}
-
+	assert.Equal(t, expectedTotalPrice, actualTotalPrice)
 }
