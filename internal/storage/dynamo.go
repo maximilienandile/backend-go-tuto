@@ -3,6 +3,8 @@ package storage
 import (
 	"fmt"
 
+	"github.com/maximilienandile/backend-go-tuto/internal/category"
+
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
 
@@ -14,7 +16,9 @@ import (
 )
 
 const partitionKeyAttributeName = "PK"
+const sortKeyAttributeName = "SK"
 const pkProduct = "product"
+const pkCategory = "category"
 
 type Dynamo struct {
 	tableName  string
@@ -47,7 +51,7 @@ func (d *Dynamo) CreateProduct(product product.Product) error {
 	item[partitionKeyAttributeName] = &dynamodb.AttributeValue{
 		S: aws.String(pkProduct),
 	}
-	item["SK"] = &dynamodb.AttributeValue{
+	item[sortKeyAttributeName] = &dynamodb.AttributeValue{
 		S: aws.String(product.ID),
 	}
 	_, err = d.client.PutItem(&dynamodb.PutItemInput{
@@ -84,4 +88,25 @@ func (d *Dynamo) Products() ([]product.Product, error) {
 		return nil, fmt.Errorf("impossible to unmarshall results: %s", err)
 	}
 	return products, nil
+}
+
+func (d *Dynamo) CreateCategory(category category.Category) error {
+	item, err := dynamodbattribute.MarshalMap(category)
+	if err != nil {
+		return fmt.Errorf("impossible to marshall category: %w", err)
+	}
+	item[partitionKeyAttributeName] = &dynamodb.AttributeValue{
+		S: aws.String(pkCategory),
+	}
+	item[sortKeyAttributeName] = &dynamodb.AttributeValue{
+		S: aws.String(category.ID),
+	}
+	_, err = d.client.PutItem(&dynamodb.PutItemInput{
+		Item:      item,
+		TableName: &d.tableName,
+	})
+	if err != nil {
+		return fmt.Errorf("impossible to Put item in db: %w", err)
+	}
+	return nil
 }

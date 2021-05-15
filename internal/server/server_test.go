@@ -7,6 +7,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/maximilienandile/backend-go-tuto/internal/category"
+
 	"github.com/maximilienandile/backend-go-tuto/internal/uniqueid"
 
 	"github.com/maximilienandile/backend-go-tuto/internal/storage"
@@ -48,4 +50,47 @@ func TestServer_CreateProduct(t *testing.T) {
 	// THEN
 	assert.Equal(t, http.StatusOK, recorder.Code)
 	assert.Equal(t, "{\"id\":\"foo\",\"name\":\"test product\",\"image\":\"\",\"shortDescription\":\"\",\"description\":\"\",\"priceVatExcluded\":{\"money\":null,\"display\":\"\"},\"vat\":{\"money\":null,\"display\":\"\"},\"totalPrice\":{\"money\":null,\"display\":\"\"}}", recorder.Body.String())
+}
+
+func TestServer_CreateCategory(t *testing.T) {
+	// GIVEN
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	mockedStorage := storage.NewMockStorage(ctrl)
+	mockedUniqueIDGenerator := uniqueid.NewMockGenerator(ctrl)
+	testServer, err := New(Config{
+		Port:              8080,
+		Storage:           mockedStorage,
+		UniqueIDGenerator: mockedUniqueIDGenerator,
+	})
+	assert.NoError(t, err, "building a server should not return an error")
+	recorder := httptest.NewRecorder()
+
+	categoryInput := category.Category{
+		Name:        "Test name",
+		Description: "Test Description",
+	}
+	categoryInputJSON, err := json.Marshal(categoryInput)
+	assert.NoError(t, err, "impossible to marshall category")
+	req, err := http.NewRequest("POST", "/admin/categories", bytes.NewReader(categoryInputJSON))
+	assert.NoError(t, err, "no error should happend when building the request")
+	req.Header.Add("Authorization", "ABC")
+	// mocks expectations
+	mockedUniqueIDGenerator.EXPECT().Generate().Return("foo")
+
+	categorySavedInDb := category.Category{
+		ID:          "foo",
+		Name:        categoryInput.Name,
+		Description: categoryInput.Description,
+	}
+	mockedStorage.EXPECT().CreateCategory(categorySavedInDb).Return(nil)
+
+	// WHEN
+	testServer.Engine.ServeHTTP(recorder, req)
+	// THEN
+	assert.Equal(t, http.StatusOK, recorder.Code)
+	expectedCategory, err := json.Marshal(categorySavedInDb)
+	assert.NoError(t, err, "no error should be fired when we marshall the category to JSON")
+	assert.Equal(t, string(expectedCategory), recorder.Body.String())
+
 }

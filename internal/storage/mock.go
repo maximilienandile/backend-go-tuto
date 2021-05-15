@@ -8,6 +8,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
+	category "github.com/maximilienandile/backend-go-tuto/internal/category"
 	product "github.com/maximilienandile/backend-go-tuto/internal/product"
 )
 
@@ -32,6 +33,20 @@ func NewMockStorage(ctrl *gomock.Controller) *MockStorage {
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockStorage) EXPECT() *MockStorageMockRecorder {
 	return m.recorder
+}
+
+// CreateCategory mocks base method.
+func (m *MockStorage) CreateCategory(category category.Category) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateCategory", category)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreateCategory indicates an expected call of CreateCategory.
+func (mr *MockStorageMockRecorder) CreateCategory(category interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateCategory", reflect.TypeOf((*MockStorage)(nil).CreateCategory), category)
 }
 
 // CreateProduct mocks base method.

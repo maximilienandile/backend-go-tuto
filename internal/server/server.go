@@ -47,6 +47,7 @@ func New(config Config) (*Server, error) {
 	engine.GET("/categories", s.Categories)
 	engine.GET("/products", s.Products)
 	engine.POST("/admin/products", s.CreateProduct)
+	engine.POST("/admin/categories", s.CreateCategories)
 	return s, nil
 }
 
@@ -113,4 +114,21 @@ func (s *Server) CreateProduct(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, productToAdd)
+}
+
+func (s *Server) CreateCategories(c *gin.Context) {
+	var categoryToSave category.Category
+	err := c.BindJSON(&categoryToSave)
+	if err != nil {
+		log.Printf("error while binding JSON: %s \n", err)
+		return
+	}
+	categoryToSave.ID = s.uniqueIDGenerator.Generate()
+	err = s.storage.CreateCategory(categoryToSave)
+	if err != nil {
+		log.Printf("error occured while saving the catgory: %s \n", err)
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "impossible to persist category"})
+		return
+	}
+	c.JSON(http.StatusOK, categoryToSave)
 }
