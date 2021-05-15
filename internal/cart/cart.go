@@ -9,7 +9,10 @@ import (
 type Cart struct {
 	ID           string
 	CurrencyCode string
-	Items        []Item
+	// key: productID
+	// value : the item in the cart
+	Items   map[string]Item
+	Version uint
 }
 
 func (c Cart) TotalPriceVATInc() (*money.Money, error) {
