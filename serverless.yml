@@ -5,6 +5,19 @@ provider:
   region: eu-west-1
   environment:
     ALLOWED_ORIGIN: ${opt:allowedOrigin}
+  iam:
+    role:
+      statements:
+        - Effect: "Allow"
+          Action:
+            - "dynamodb:PutItem"
+          Resource:
+            Fn::Join:
+              - ":"
+              - - "arn:aws:dynamodb"
+                - Ref: "AWS::Region"
+                - Ref: "AWS::AccountId"
+                - table/ecommerce-${opt:stage}
 package:
   exclude:
     - ./**
