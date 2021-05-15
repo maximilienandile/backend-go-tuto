@@ -388,6 +388,15 @@ func (d Dynamo) buildUpdateCartRequest(updatedCart cart.Cart, userID string) (*d
 		// set version (increment it)
 		expression.Name("version"),
 		expression.Value(updatedCart.Version+1),
+	).Set(
+		expression.Name("totalPriceVATInc"),
+		expression.Value(updatedCart.TotalVATInc),
+	).Set(
+		expression.Name("totalVAT"),
+		expression.Value(updatedCart.TotalVAT),
+	).Set(
+		expression.Name("totalPriceVATExc"),
+		expression.Value(updatedCart.TotalVATExc),
 	)
 
 	builder := expression.NewBuilder().WithCondition(condition).WithUpdate(update)

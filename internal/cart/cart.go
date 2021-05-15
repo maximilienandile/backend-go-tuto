@@ -88,7 +88,7 @@ func (c *Cart) UpsertItem(product product.Product, delta int) error {
 			ShortDescription: product.ShortDescription,
 			UnitPriceVATExc:  product.PriceVATExcluded,
 			VAT:              product.VAT,
-			UnitPriceVATInc:  product.PriceVATExcluded,
+			UnitPriceVATInc:  product.TotalPrice,
 		}
 	} else {
 		// a product with this id is already in the cart
@@ -115,5 +115,5 @@ type Item struct {
 	Quantity         uint8             `json:"quantity"`
 	UnitPriceVATExc  extMoney.ExtMoney `json:"unitPriceVATExc"`
 	VAT              extMoney.ExtMoney `json:"vat"`
-	UnitPriceVATInc  extMoney.ExtMoney `json:"UnitPriceVATInc"`
+	UnitPriceVATInc  extMoney.ExtMoney `json:"unitPriceVATInc"`
 }
