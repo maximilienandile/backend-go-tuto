@@ -1,6 +1,10 @@
 package main
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+	"log"
+)
 
 type Product struct {
 	ID          string
@@ -26,11 +30,11 @@ func main() {
 		ID:    "42",
 		Stock: 10,
 	}
-	//fmt.Println(p.IsInStock())
+	fmt.Println(p.IsInStock())
 	err := p.SetDescription("sjdqjdisqdjiodjidjqdjiqjsjdqidji")
 	if err != nil {
-		//log.Fatalf("%s",err)
+		log.Fatalf("%s", err)
 	}
-	//fmt.Println("Success")
+	fmt.Println("Success")
 
 }
