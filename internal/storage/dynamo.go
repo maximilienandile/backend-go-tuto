@@ -308,11 +308,94 @@ func (d *Dynamo) CreateOrUpdateCart(userID string, productID string, delta int) 
 }
 
 func (d Dynamo) buildUpdateStockQuery(productDB product.Product, delta int) (*dynamodb.TransactWriteItem, error) {
+	// if delta > 0 => 2
+	// it means that I want to add 2 quantity of that to my cart
+	// oldStock = 3
+	// newStock = 3-2 = 1
 
-	return nil, nil
+	// if delta < 0 => -2
+	// it means that I want to remove 2 quantity from my cart
+	// oldStock = 3
+	// newSock = 3 - (-2) = 3+2 = 5
+	newStock := int(productDB.Stock) - delta
+	newReserved := int(productDB.Reserved) + delta
+	if newStock < 0 || newReserved < 0 {
+		return nil, fmt.Errorf("we cannot have negative quantities, newStock: %d - newReserved : %d", newStock, newReserved)
+	}
+	primaryKey := map[string]*dynamodb.AttributeValue{
+		partitionKeyAttributeName: &dynamodb.AttributeValue{S: aws.String(pkProduct)},
+		sortKeyAttributeName:      &dynamodb.AttributeValue{S: aws.String(productDB.ID)},
+	}
+	// condition
+	// version should be the same
+	// (to protect us concurrent updates)
+	condition := expression.Name("version").Equal(expression.Value(productDB.Version))
+
+	update := expression.Set(
+		// set the stock
+		expression.Name("stock"),
+		expression.Value(newStock),
+	).Set(
+		// set reserved
+		expression.Name("reserved"),
+		expression.Value(newReserved),
+	).Set(
+		// set version (increment it)
+		expression.Name("version"),
+		expression.Value(productDB.Version+1),
+	)
+
+	builder := expression.NewBuilder().WithCondition(condition).WithUpdate(update)
+	expr, err := builder.Build()
+	if err != nil {
+		return nil, fmt.Errorf("impossible to build the expression")
+	}
+	updateStockRequest := &dynamodb.TransactWriteItem{
+		Update: &dynamodb.Update{
+			ConditionExpression:       expr.Condition(),
+			ExpressionAttributeNames:  expr.Names(),
+			ExpressionAttributeValues: expr.Values(),
+			Key:                       primaryKey,
+			TableName:                 &d.tableName,
+			UpdateExpression:          expr.Update(),
+		}}
+
+	return updateStockRequest, nil
 }
 
 func (d Dynamo) buildUpdateCartRequest(updatedCart cart.Cart, userID string) (*dynamodb.TransactWriteItem, error) {
+	primaryKey := map[string]*dynamodb.AttributeValue{
+		partitionKeyAttributeName: &dynamodb.AttributeValue{S: aws.String(pkCart)},
+		sortKeyAttributeName:      &dynamodb.AttributeValue{S: aws.String(userID)},
+	}
+	// condition
+	// version should be the same
+	// (to protect us concurrent updates)
+	condition := expression.Name("version").Equal(expression.Value(updatedCart.Version))
 
-	return nil, nil
+	update := expression.Set(
+		// set the stock
+		expression.Name("items"),
+		expression.Value(updatedCart.Items),
+	).Set(
+		// set version (increment it)
+		expression.Name("version"),
+		expression.Value(updatedCart.Version+1),
+	)
+
+	builder := expression.NewBuilder().WithCondition(condition).WithUpdate(update)
+	expr, err := builder.Build()
+	if err != nil {
+		return nil, fmt.Errorf("impossible to build the expression")
+	}
+	updateCart := &dynamodb.TransactWriteItem{
+		Update: &dynamodb.Update{
+			ConditionExpression:       expr.Condition(),
+			ExpressionAttributeNames:  expr.Names(),
+			ExpressionAttributeValues: expr.Values(),
+			Key:                       primaryKey,
+			TableName:                 &d.tableName,
+			UpdateExpression:          expr.Update(),
+		}}
+	return updateCart, nil
 }

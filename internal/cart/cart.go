@@ -29,8 +29,32 @@ func (c Cart) TotalPriceVATInc() (*money.Money, error) {
 }
 
 func (c *Cart) UpsertItem(productID string, delta int) error {
-	// handle the logic to add an item to a cart
+	itemFound, found := c.Items[productID]
+	if !found {
+		// item not in the cart we have to add it
+		if delta <= 0 {
+			return fmt.Errorf("item not found in the cart, but delta is less or equal to zero, (we cannot add an item with a negative or zero quantity): %d", delta)
+		}
+		c.Items[productID] = Item{
+			ID:       productID,
+			Quantity: uint8(delta),
+		}
+	} else {
+		// a product with this id is already in the cart
+		// we found an entry in the map
+		newQuantity := int(itemFound.Quantity) + delta
+		if newQuantity < 0 {
+			return fmt.Errorf("new quantity cannot be less than zero")
+		} else if newQuantity > 0 {
+			itemFound.Quantity = uint8(newQuantity)
+			c.Items[productID] = itemFound
+		} else {
+			// equal to zero.
+			// it means that I want to remove that from my cart
+			delete(c.Items, productID)
+		}
 
+	}
 	return nil
 }
 

@@ -49,7 +49,7 @@ func TestServer_CreateProduct(t *testing.T) {
 
 	// THEN
 	assert.Equal(t, http.StatusOK, recorder.Code)
-	assert.Equal(t, "{\"id\":\"foo\",\"name\":\"test product\",\"image\":\"\",\"shortDescription\":\"\",\"description\":\"\",\"priceVatExcluded\":{\"money\":null,\"display\":\"\"},\"vat\":{\"money\":null,\"display\":\"\"},\"totalPrice\":{\"money\":null,\"display\":\"\"}}", recorder.Body.String())
+	assert.Equal(t, "{\"id\":\"foo\",\"name\":\"test product\",\"image\":\"\",\"shortDescription\":\"\",\"description\":\"\",\"priceVatExcluded\":{\"money\":null,\"display\":\"\"},\"vat\":{\"money\":null,\"display\":\"\"},\"totalPrice\":{\"money\":null,\"display\":\"\"},\"stock\":0,\"reserved\":0,\"version\":0}", recorder.Body.String())
 }
 
 func TestServer_CreateCategory(t *testing.T) {
