@@ -29,7 +29,7 @@ func New(config Config) (*Server, error) {
 		port:          config.Port,
 		allowedOrigin: config.AllowedOrigin,
 	}
-	engine.Use(s.CORSMiddleware)
+	engine.Use(s.CORSMiddleware, s.MiddlewareServerModel, s.CheckRequest)
 	// Create a new middleware
 	// this middleware add a Header to the response
 	// Header Name : X-Server-Model
@@ -45,6 +45,19 @@ func (s *Server) Run() error {
 
 func (s Server) CORSMiddleware(c *gin.Context) {
 	c.Header("Access-Control-Allow-Origin", s.allowedOrigin)
+}
+
+func (s Server) MiddlewareServerModel(c *gin.Context) {
+	c.Header("X-Server-Model", "Gin")
+}
+
+func (s Server) CheckRequest(c *gin.Context) {
+	authValue := c.GetHeader("Authorization")
+	if authValue != "ABC" {
+		c.AbortWithStatus(http.StatusForbidden)
+		return
+	}
+
 }
 
 func (s *Server) Categories(c *gin.Context) {

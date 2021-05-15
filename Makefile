@@ -10,3 +10,6 @@ build:
 
 deploy: build
 	serverless deploy --aws-profile maxaldtools
+
+deploy_dev: build
+	serverless deploy --aws-profile maxaldtools --allowedOrigin http://localhost:8080
