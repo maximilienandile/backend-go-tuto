@@ -7,6 +7,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/maximilienandile/backend-go-tuto/internal/uniqueid"
+
 	"github.com/maximilienandile/backend-go-tuto/internal/storage"
 
 	"github.com/golang/mock/gomock"
@@ -21,9 +23,11 @@ func TestServer_CreateProduct(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 	mockedStorage := storage.NewMockStorage(ctrl)
+	mockedUniqueIDGenerator := uniqueid.NewMockGenerator(ctrl)
 	testServer, err := New(Config{
-		Port:    8080,
-		Storage: mockedStorage,
+		Port:              8080,
+		Storage:           mockedStorage,
+		UniqueIDGenerator: mockedUniqueIDGenerator,
 	})
 	assert.NoError(t, err, "building a server should not return an error")
 	recorder := httptest.NewRecorder()
@@ -37,11 +41,11 @@ func TestServer_CreateProduct(t *testing.T) {
 	req.Header.Add("Authorization", "ABC")
 	// mocks expectations
 	mockedStorage.EXPECT().CreateProduct(gomock.Any()).Return(nil)
-
+	mockedUniqueIDGenerator.EXPECT().Generate().Return("foo")
 	// WHEN
 	testServer.Engine.ServeHTTP(recorder, req)
 
 	// THEN
 	assert.Equal(t, http.StatusOK, recorder.Code)
-	assert.Equal(t, "{\"id\":\"2cdd32ee-f855-463a-a9dd-fe97f760c3d8\",\"name\":\"test product\",\"image\":\"\",\"shortDescription\":\"\",\"description\":\"\",\"priceVatExcluded\":{\"money\":null,\"display\":\"\"},\"vat\":{\"money\":null,\"display\":\"\"},\"totalPrice\":{\"money\":null,\"display\":\"\"}}", recorder.Body.String())
+	assert.Equal(t, "{\"id\":\"foo\",\"name\":\"test product\",\"image\":\"\",\"shortDescription\":\"\",\"description\":\"\",\"priceVatExcluded\":{\"money\":null,\"display\":\"\"},\"vat\":{\"money\":null,\"display\":\"\"},\"totalPrice\":{\"money\":null,\"display\":\"\"}}", recorder.Body.String())
 }

@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	uuid "github.com/satori/go.uuid"
+	"github.com/maximilienandile/backend-go-tuto/internal/uniqueid"
 
 	"github.com/maximilienandile/backend-go-tuto/internal/storage"
 
@@ -17,25 +17,28 @@ import (
 )
 
 type Server struct {
-	Engine        *gin.Engine
-	port          uint
-	allowedOrigin string
-	storage       storage.Storage
+	Engine            *gin.Engine
+	port              uint
+	allowedOrigin     string
+	storage           storage.Storage
+	uniqueIDGenerator uniqueid.Generator
 }
 
 type Config struct {
-	Port          uint
-	AllowedOrigin string
-	Storage       storage.Storage
+	Port              uint
+	AllowedOrigin     string
+	Storage           storage.Storage
+	UniqueIDGenerator uniqueid.Generator
 }
 
 func New(config Config) (*Server, error) {
 	engine := gin.Default()
 	s := &Server{
-		Engine:        engine,
-		port:          config.Port,
-		allowedOrigin: config.AllowedOrigin,
-		storage:       config.Storage,
+		Engine:            engine,
+		port:              config.Port,
+		allowedOrigin:     config.AllowedOrigin,
+		storage:           config.Storage,
+		uniqueIDGenerator: config.UniqueIDGenerator,
 	}
 	engine.Use(s.CORSMiddleware, s.MiddlewareServerModel, s.CheckRequest)
 	// Create a new middleware
@@ -158,7 +161,7 @@ func (s *Server) CreateProduct(c *gin.Context) {
 		log.Printf("error while binding JSON: %s \n", err)
 		return
 	}
-	productToAdd.ID = uuid.NewV4().String()
+	productToAdd.ID = s.uniqueIDGenerator.Generate()
 	err = s.storage.CreateProduct(productToAdd)
 	if err != nil {
 		//

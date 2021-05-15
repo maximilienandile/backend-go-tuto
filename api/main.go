@@ -5,6 +5,8 @@ import (
 	"log"
 	"os"
 
+	"github.com/maximilienandile/backend-go-tuto/internal/uniqueid"
+
 	"github.com/maximilienandile/backend-go-tuto/internal/storage"
 
 	"github.com/aws/aws-lambda-go/lambda"
@@ -29,9 +31,10 @@ func init() {
 	}
 
 	myServer, err := server.New(server.Config{
-		Port:          9090,
-		AllowedOrigin: allowedOrigin,
-		Storage:       dynamoStorage,
+		Port:              9090,
+		AllowedOrigin:     allowedOrigin,
+		Storage:           dynamoStorage,
+		UniqueIDGenerator: uniqueid.UUIDV4{},
 	})
 	if err != nil {
 		log.Fatalf("impossible to create the server: %s", err)

@@ -16,3 +16,4 @@ deploy_dev: build
 
 genMocks:
 	mockgen -source=internal/storage/interface.go -destination=internal/storage/mock.go -package=storage
+	mockgen -source=internal/uniqueid/interface.go -destination=internal/uniqueid/mock.go -package=uniqueid
