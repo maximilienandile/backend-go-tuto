@@ -21,7 +21,7 @@ type UpdateProductInput struct {
 
 type Storage interface {
 	CreateProduct(product product.Product) error
-	Products() ([]product.Product, error)
+	Products(categoryID string) ([]product.Product, error)
 	CreateCategory(category category.Category) error
 	Categories() ([]category.Category, error)
 	UpdateInventory(productID string, delta int) error

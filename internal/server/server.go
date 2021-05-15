@@ -107,7 +107,7 @@ func (s *Server) Categories(c *gin.Context) {
 }
 
 func (s *Server) Products(c *gin.Context) {
-	products, err := s.storage.Products()
+	products, err := s.storage.Products(c.Query("categoryId"))
 	if err != nil {
 		log.Printf("impossible to get the products: %s", err)
 		c.AbortWithStatus(http.StatusInternalServerError)

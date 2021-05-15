@@ -68,8 +68,31 @@ func (d *Dynamo) CreateProduct(product product.Product) error {
 	return nil
 }
 
-func (d *Dynamo) Products() ([]product.Product, error) {
-	out, err := d.getElementsByPK(pkProduct)
+func (d *Dynamo) Products(categoryID string) ([]product.Product, error) {
+	// PK = :myValue
+	keyCondition := expression.Key(partitionKeyAttributeName).Equal(expression.Value(pkProduct))
+	filter := expression.Name("categoryId").Equal(expression.Value(categoryID))
+	builder := expression.NewBuilder().WithKeyCondition(keyCondition)
+	if categoryID != "" {
+		builder = builder.WithFilter(filter)
+	}
+	expr, err := builder.Build()
+	if err != nil {
+		return nil, fmt.Errorf("impossible to build expression: %s", err)
+	}
+	input := dynamodb.QueryInput{
+		KeyConditionExpression:    expr.KeyCondition(),
+		ExpressionAttributeNames:  expr.Names(),
+		ExpressionAttributeValues: expr.Values(),
+		TableName:                 &d.tableName,
+	}
+	if categoryID != "" {
+		input.FilterExpression = expr.Filter()
+	}
+	out, err := d.client.Query(&input)
+	if err != nil {
+		return nil, fmt.Errorf("impossible to query database: %s", err)
+	}
 	if err != nil {
 		return nil, fmt.Errorf("impossible to retrieve elements by PK: %w", err)
 	}
