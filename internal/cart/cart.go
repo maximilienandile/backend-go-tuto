@@ -19,30 +19,49 @@ type Cart struct {
 	TotalVATInc extMoney.ExtMoney `json:"totalPriceVATInc"`
 	TotalVAT    extMoney.ExtMoney `json:"totalVAT"`
 	TotalVATExc extMoney.ExtMoney `json:"totalPriceVATExc"`
+	CountItems  uint              `json:"countItems"`
 }
 
 func (c *Cart) ComputePrices() error {
 	if c.CurrencyCode == "" {
 		c.CurrencyCode = "EUR"
 	}
-	// compute total price VAT INC
+	// compute total price UnitVAT INC
 	totalPriceVATInc, err := c.TotalPriceVATInc()
 	if err != nil {
-		return fmt.Errorf("impossible to compute total VAT Inc: %w", err)
+		return fmt.Errorf("impossible to compute total UnitVAT Inc: %w", err)
 	}
 	c.TotalVATInc = extMoney.FromMoney(totalPriceVATInc)
-	// VAT
-	totalVAT, err := c.VAT()
+	// UnitVAT
+	totalVAT, err := c.ComputeTotalVAT()
 	if err != nil {
-		return fmt.Errorf("impossible to compute total VAT: %w", err)
+		return fmt.Errorf("impossible to compute total UnitVAT: %w", err)
 	}
 	c.TotalVAT = extMoney.FromMoney(totalVAT)
-	// total price VAT Exc = Total VAT INC - VAT
+	// total price UnitVAT Exc = Total UnitVAT INC - UnitVAT
 	totalPriceVATExc, err := totalPriceVATInc.Subtract(totalVAT)
 	if err != nil {
-		return fmt.Errorf("impossible to compute total VAT exc, cannot substract: %w", err)
+		return fmt.Errorf("impossible to compute total UnitVAT exc, cannot substract: %w", err)
 	}
 	c.TotalVATExc = extMoney.FromMoney(totalPriceVATExc)
+
+	// compute prices for each item
+	for k, item := range c.Items {
+		// compute the 3 prices
+		totalVATForItem := item.ComputeTotalVAT()
+		item.TotalVAT = extMoney.FromMoney(totalVATForItem)
+
+		totalPriceVATIncForItem := item.ComputeTotalPriceVATInc()
+		item.TotalPriceVATInc = extMoney.FromMoney(totalPriceVATIncForItem)
+
+		totalPriceVATExcForItem, err := totalPriceVATIncForItem.Subtract(totalVATForItem)
+		if err != nil {
+			return fmt.Errorf("impossible to compute totalPriceVATIncForItem : %w", err)
+		}
+		item.TotalPriceVATExc = extMoney.FromMoney(totalPriceVATExcForItem)
+		c.Items[k] = item
+	}
+
 	return nil
 }
 
@@ -59,10 +78,10 @@ func (c Cart) TotalPriceVATInc() (*money.Money, error) {
 	return totalPrice, nil
 }
 
-func (c Cart) VAT() (*money.Money, error) {
+func (c Cart) ComputeTotalVAT() (*money.Money, error) {
 	totalVAT := money.New(0, c.CurrencyCode)
 	for _, item := range c.Items {
-		itemVAT := item.VAT.ToMoney().Multiply(int64(item.Quantity))
+		itemVAT := item.UnitVAT.ToMoney().Multiply(int64(item.Quantity))
 		var err error
 		totalVAT, err = totalVAT.Add(itemVAT)
 		if err != nil {
@@ -72,6 +91,8 @@ func (c Cart) VAT() (*money.Money, error) {
 	return totalVAT, nil
 }
 
+// UpsertItem will add or remove an item in the cart
+// it's going to modify the CountItems property
 func (c *Cart) UpsertItem(product product.Product, delta int) error {
 	if c.Items == nil {
 		c.Items = make(map[string]Item)
@@ -84,10 +105,11 @@ func (c *Cart) UpsertItem(product product.Product, delta int) error {
 		}
 		c.Items[product.ID] = Item{
 			ID:               product.ID,
+			Title:            product.Name,
 			Quantity:         uint8(delta),
 			ShortDescription: product.ShortDescription,
 			UnitPriceVATExc:  product.PriceVATExcluded,
-			VAT:              product.VAT,
+			UnitVAT:          product.VAT,
 			UnitPriceVATInc:  product.TotalPrice,
 		}
 	} else {
@@ -106,14 +128,10 @@ func (c *Cart) UpsertItem(product product.Product, delta int) error {
 		}
 
 	}
+	count := int(c.CountItems) + delta
+	if count < 0 {
+		return fmt.Errorf("impossible to have a count that is less than 0")
+	}
+	c.CountItems = uint(count)
 	return nil
-}
-
-type Item struct {
-	ID               string            `json:"id"`
-	ShortDescription string            `json:"shortDescription"`
-	Quantity         uint8             `json:"quantity"`
-	UnitPriceVATExc  extMoney.ExtMoney `json:"unitPriceVATExc"`
-	VAT              extMoney.ExtMoney `json:"vat"`
-	UnitPriceVATInc  extMoney.ExtMoney `json:"unitPriceVATInc"`
 }

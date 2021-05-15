@@ -397,6 +397,9 @@ func (d Dynamo) buildUpdateCartRequest(updatedCart cart.Cart, userID string) (*d
 	).Set(
 		expression.Name("totalPriceVATExc"),
 		expression.Value(updatedCart.TotalVATExc),
+	).Set(
+		expression.Name("countItems"),
+		expression.Value(updatedCart.CountItems),
 	)
 
 	builder := expression.NewBuilder().WithCondition(condition).WithUpdate(update)

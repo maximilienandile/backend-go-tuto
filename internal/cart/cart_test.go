@@ -3,6 +3,8 @@ package cart
 import (
 	"testing"
 
+	"github.com/maximilienandile/backend-go-tuto/internal/extMoney"
+
 	"github.com/stretchr/testify/assert"
 
 	"github.com/Rhymond/go-money"
@@ -15,14 +17,13 @@ func TestCart_TotalPriceVATInc(t *testing.T) {
 			"42": {
 				ID:               "42",
 				ShortDescription: "A pair of socks",
-				UnitPriceVATInc:  money.New(100, "EUR"),
-				UnitPriceVATExc:  money.New(50, "EUR"),
-				VAT:              money.New(50, "EUR"),
+				UnitPriceVATInc:  extMoney.FromMoney(money.New(100, "EUR")),
+				UnitPriceVATExc:  extMoney.FromMoney(money.New(50, "EUR")),
+				UnitVAT:          extMoney.FromMoney(money.New(50, "EUR")),
 				Quantity:         1,
 			},
 		}
 		cart := Cart{
-			ID:           "42",
 			CurrencyCode: "EUR",
 			Items:        items,
 		}
@@ -30,7 +31,7 @@ func TestCart_TotalPriceVATInc(t *testing.T) {
 		actualTotalPrice, err := cart.TotalPriceVATInc()
 
 		// THEN
-		assert.NoError(t, err, "impossible to compute total price VAT included")
+		assert.NoError(t, err, "impossible to compute total price UnitVAT included")
 		expectedTotalPrice := money.New(100, "EUR")
 		assert.Equal(t, expectedTotalPrice, actualTotalPrice)
 	})
@@ -40,22 +41,21 @@ func TestCart_TotalPriceVATInc(t *testing.T) {
 			"42": {
 				ID:               "42",
 				ShortDescription: "A pair of socks",
-				UnitPriceVATInc:  money.New(100, "EUR"),
-				UnitPriceVATExc:  money.New(50, "EUR"),
-				VAT:              money.New(50, "EUR"),
+				UnitPriceVATInc:  extMoney.FromMoney(money.New(100, "EUR")),
+				UnitPriceVATExc:  extMoney.FromMoney(money.New(50, "EUR")),
+				UnitVAT:          extMoney.FromMoney(money.New(50, "EUR")),
 				Quantity:         1,
 			},
 			"43": {
 				ID:               "43",
 				ShortDescription: "A T-Shirt with a small gopher",
-				UnitPriceVATInc:  money.New(3480, "EUR"),
-				UnitPriceVATExc:  money.New(2900, "EUR"),
-				VAT:              money.New(580, "EUR"),
+				UnitPriceVATInc:  extMoney.FromMoney(money.New(3480, "EUR")),
+				UnitPriceVATExc:  extMoney.FromMoney(money.New(2900, "EUR")),
+				UnitVAT:          extMoney.FromMoney(money.New(580, "EUR")),
 				Quantity:         2,
 			},
 		}
 		cart := Cart{
-			ID:           "42",
 			CurrencyCode: "EUR",
 			Items:        items,
 		}
@@ -64,7 +64,7 @@ func TestCart_TotalPriceVATInc(t *testing.T) {
 		actualTotalPriceVATInc, err := cart.TotalPriceVATInc()
 
 		// THEN
-		assert.NoError(t, err, "should have no error when total price VAT inc is computed")
+		assert.NoError(t, err, "should have no error when total price UnitVAT inc is computed")
 		expectedTotalPriceVATINC := money.New(7060, "EUR")
 		assert.Equal(t, expectedTotalPriceVATINC, actualTotalPriceVATInc)
 	})
@@ -73,14 +73,13 @@ func TestCart_TotalPriceVATInc(t *testing.T) {
 			"42": {
 				ID:               "42",
 				ShortDescription: "A pair of socks",
-				UnitPriceVATInc:  money.New(100, "USD"),
-				UnitPriceVATExc:  money.New(50, "USD"),
-				VAT:              money.New(50, "USD"),
+				UnitPriceVATInc:  extMoney.FromMoney(money.New(100, "USD")),
+				UnitPriceVATExc:  extMoney.FromMoney(money.New(50, "USD")),
+				UnitVAT:          extMoney.FromMoney(money.New(50, "USD")),
 				Quantity:         1,
 			},
 		}
 		cart := Cart{
-			ID:           "42",
 			CurrencyCode: "EUR",
 			Items:        items,
 		}
