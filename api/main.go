@@ -5,6 +5,8 @@ import (
 	"log"
 	"os"
 
+	"github.com/maximilienandile/backend-go-tuto/internal/storage"
+
 	"github.com/aws/aws-lambda-go/lambda"
 
 	ginadapter "github.com/awslabs/aws-lambda-go-api-proxy/gin"
@@ -20,6 +22,10 @@ func init() {
 	allowedOrigin, found := os.LookupEnv("ALLOWED_ORIGIN")
 	if !found {
 		log.Fatal("env variable ALLOWED_ORIGIN was not found")
+	}
+	storage, err := storage.NewDynamo("ecommerce-dev")
+	if err != nil {
+		log.Fatalf("impossible to create storage interface: %s", err)
 	}
 	myServer, err := server.New(server.Config{
 		Port:          9090,
