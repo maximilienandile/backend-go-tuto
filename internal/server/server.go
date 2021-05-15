@@ -173,6 +173,20 @@ func (s *Server) UpdateProduct(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "productId is mandatory"})
 		return
 	}
+	// recompute total price
+	vatInput := input.VAT.ToMoney()
+	priceVatExc := input.PriceVATExcluded.ToMoney()
+
+	totalPrice, err := priceVatExc.Add(vatInput)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "impossible to add VAT + Price VAT exc"})
+		return
+	}
+	input.TotalPrice = extMoney.FromMoney(totalPrice)
+	// reset the Display property
+	input.VAT.Display = vatInput.Display()
+	input.PriceVATExcluded.Display = priceVatExc.Display()
+
 	err = s.storage.UpdateProduct(storage.UpdateProductInput{
 		ProductID:        productID,
 		Name:             input.Name,
