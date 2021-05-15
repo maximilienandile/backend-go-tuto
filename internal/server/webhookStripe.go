@@ -77,13 +77,15 @@ func (s Server) HandleStripeWebhook(c *gin.Context) {
 			c.AbortWithStatus(http.StatusInternalServerError)
 			return
 		}
+		log.Println("FROM:", s.emailFrom, "TO", checkoutSession.Customer.Email)
 		err = s.emailSender.Send(email.SendInput{
-			ToAddress:   checkoutSession.Customer.Email,
+			ToAddress:   checkoutSession.CustomerDetails.Email,
 			FromAddress: s.emailFrom,
 			HtmlBody:    confirmationEmail.BodyAsHTML,
 			TextBody:    confirmationEmail.BodyAsText,
 			Subject:     "Order Confirmed",
 		})
+
 		if err != nil {
 			log.Printf("impossible to send email: %s", err)
 			c.AbortWithStatus(http.StatusInternalServerError)

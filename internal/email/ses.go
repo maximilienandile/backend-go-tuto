@@ -2,6 +2,7 @@ package email
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/aws/aws-sdk-go/aws"
 
@@ -51,6 +52,7 @@ func (s *SimpleEmailSender) Send(in SendInput) error {
 		},
 		Source: &in.FromAddress,
 	}
+	log.Println(input.String())
 	_, err := s.sesClient.SendEmail(&input)
 	if err != nil {
 		return fmt.Errorf("impossible to call SendEmail: %w", err)

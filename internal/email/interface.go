@@ -41,7 +41,8 @@ func NewOrderConfirmationEmail(input OrderConfirmationEmailInput) (Email, error)
 			Name: input.ProductName,
 			Link: input.StoreLink,
 			// Optional product logo
-			Logo: input.LogoURL,
+			Logo:      input.LogoURL,
+			Copyright: "Copyright",
 		},
 	}
 	email := hermes.Email{
@@ -61,15 +62,7 @@ func NewOrderConfirmationEmail(input OrderConfirmationEmailInput) (Email, error)
 					},
 				},
 			},
-			Actions: []hermes.Action{
-				{
-					Instructions: "You can check the status of your order and more in your dashboard:",
-					Button: hermes.Button{
-						Text: "Go to Dashboard",
-						Link: "https://hermes-example.com/dashboard",
-					},
-				},
-			},
+			Actions: []hermes.Action{},
 		},
 	}
 	lines := make([][]hermes.Entry, 0)

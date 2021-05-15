@@ -65,8 +65,8 @@ func (s Server) Checkout(c *gin.Context) {
 	params := stripe.CheckoutSessionParams{}
 	// fill the parameters of the checkout session
 	// that is to say which item are we going to sell, for which price, ...
-	params.SuccessURL = stripe.String(fmt.Sprintf("%s/success", s.frontendBaseUrl))
-	params.CancelURL = stripe.String(fmt.Sprintf("%s/cart", s.frontendBaseUrl))
+	params.SuccessURL = stripe.String(fmt.Sprintf("%s/#/success", s.frontendBaseUrl))
+	params.CancelURL = stripe.String(fmt.Sprintf("%s/#/cart", s.frontendBaseUrl))
 	params.Mode = stripe.String("payment")
 	params.LineItems = lines
 	params.ShippingAddressCollection = &stripe.CheckoutSessionShippingAddressCollectionParams{
