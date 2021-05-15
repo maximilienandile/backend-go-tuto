@@ -10,6 +10,7 @@ import (
 	gomock "github.com/golang/mock/gomock"
 	cart "github.com/maximilienandile/backend-go-tuto/internal/cart"
 	category "github.com/maximilienandile/backend-go-tuto/internal/category"
+	checkout "github.com/maximilienandile/backend-go-tuto/internal/checkout"
 	product "github.com/maximilienandile/backend-go-tuto/internal/product"
 )
 
@@ -79,6 +80,20 @@ func (mr *MockStorageMockRecorder) CreateCategory(category interface{}) *gomock.
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateCategory", reflect.TypeOf((*MockStorage)(nil).CreateCategory), category)
 }
 
+// CreateCheckoutSession mocks base method.
+func (m *MockStorage) CreateCheckoutSession(session checkout.Session) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateCheckoutSession", session)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreateCheckoutSession indicates an expected call of CreateCheckoutSession.
+func (mr *MockStorageMockRecorder) CreateCheckoutSession(session interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateCheckoutSession", reflect.TypeOf((*MockStorage)(nil).CreateCheckoutSession), session)
+}
+
 // CreateOrUpdateCart mocks base method.
 func (m *MockStorage) CreateOrUpdateCart(userID, productID string, delta int) (cart.Cart, error) {
 	m.ctrl.T.Helper()
@@ -108,6 +123,20 @@ func (mr *MockStorageMockRecorder) CreateProduct(product interface{}) *gomock.Ca
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateProduct", reflect.TypeOf((*MockStorage)(nil).CreateProduct), product)
 }
 
+// DeleteCart mocks base method.
+func (m *MockStorage) DeleteCart(userID string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteCart", userID)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteCart indicates an expected call of DeleteCart.
+func (mr *MockStorageMockRecorder) DeleteCart(userID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteCart", reflect.TypeOf((*MockStorage)(nil).DeleteCart), userID)
+}
+
 // GetCart mocks base method.
 func (m *MockStorage) GetCart(userID string) (cart.Cart, error) {
 	m.ctrl.T.Helper()
@@ -121,6 +150,21 @@ func (m *MockStorage) GetCart(userID string) (cart.Cart, error) {
 func (mr *MockStorageMockRecorder) GetCart(userID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCart", reflect.TypeOf((*MockStorage)(nil).GetCart), userID)
+}
+
+// GetCheckoutSession mocks base method.
+func (m *MockStorage) GetCheckoutSession(ID string) (checkout.Session, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCheckoutSession", ID)
+	ret0, _ := ret[0].(checkout.Session)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCheckoutSession indicates an expected call of GetCheckoutSession.
+func (mr *MockStorageMockRecorder) GetCheckoutSession(ID interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCheckoutSession", reflect.TypeOf((*MockStorage)(nil).GetCheckoutSession), ID)
 }
 
 // Product mocks base method.

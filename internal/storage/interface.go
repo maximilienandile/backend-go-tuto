@@ -3,6 +3,7 @@ package storage
 import (
 	"github.com/maximilienandile/backend-go-tuto/internal/cart"
 	"github.com/maximilienandile/backend-go-tuto/internal/category"
+	"github.com/maximilienandile/backend-go-tuto/internal/checkout"
 	"github.com/maximilienandile/backend-go-tuto/internal/extMoney"
 	"github.com/maximilienandile/backend-go-tuto/internal/product"
 )
@@ -29,4 +30,7 @@ type Storage interface {
 	GetCart(userID string) (cart.Cart, error)
 	CreateOrUpdateCart(userID string, productID string, delta int) (cart.Cart, error)
 	Product(ID string) (product.Product, error)
+	CreateCheckoutSession(session checkout.Session) error
+	GetCheckoutSession(ID string) (checkout.Session, error)
+	DeleteCart(userID string) error
 }

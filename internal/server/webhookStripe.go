@@ -46,5 +46,21 @@ func (s Server) HandleStripeWebhook(c *gin.Context) {
 		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
+	if checkoutSession.PaymentStatus == stripe.CheckoutSessionPaymentStatusPaid {
+		// the payment was a success
+		// retrieve the checkout session from the DB
+		sessionRetrieved, err := s.storage.GetCheckoutSession(checkoutSession.ID)
+		if err != nil {
+			log.Printf("impossible to find checkout session in DB: %s", err)
+			c.AbortWithStatus(http.StatusInternalServerError)
+			return
+		}
+		err = s.storage.DeleteCart(sessionRetrieved.User.ID)
+		if err != nil {
+			log.Printf("impossible to delete the cart: %s", err)
+			c.AbortWithStatus(http.StatusInternalServerError)
+			return
+		}
+	}
 
 }

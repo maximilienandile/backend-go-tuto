@@ -4,6 +4,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
+
+	"github.com/maximilienandile/backend-go-tuto/internal/checkout"
 
 	"github.com/stripe/stripe-go/v72/checkout/session"
 
@@ -76,6 +79,20 @@ func (s Server) Checkout(c *gin.Context) {
 	checkoutSession, err := session.New(&params)
 	if err != nil {
 		log.Printf("error while building the checkout session: %s", err)
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+	// create a new checkout session to be stored in the database
+	sessionToStore := checkout.Session{
+		ID:        checkoutSession.ID,
+		CreatedAt: time.Now().Format(time.RFC3339),
+		Provider:  "STRIPE",
+		Cart:      cartRetrieved,
+		User:      currentUser,
+	}
+	err = s.storage.CreateCheckoutSession(sessionToStore)
+	if err != nil {
+		log.Printf("error while saving the checkout session to DB: %s", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
