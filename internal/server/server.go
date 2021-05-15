@@ -48,7 +48,7 @@ func (s *Server) Categories(c *gin.Context) {
 			Description: "kdsjdjsidjisdj",
 		},
 	}
-	c.Header("Access-Control-Allow-Origin", "http://localhost:8080")
+	c.Header("Access-Control-Allow-Origin", "https://dev.d1vkjnwaib9pzo.amplifyapp.com")
 	c.JSON(http.StatusOK, categories)
 }
 
@@ -114,6 +114,6 @@ func (s *Server) Products(c *gin.Context) {
 			},
 		},
 	}
-	c.Header("Access-Control-Allow-Origin", "http://localhost:8080")
+	c.Header("Access-Control-Allow-Origin", "https://dev.d1vkjnwaib9pzo.amplifyapp.com")
 	c.JSON(200, products)
 }
