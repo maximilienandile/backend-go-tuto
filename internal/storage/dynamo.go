@@ -18,6 +18,10 @@ type Dynamo struct {
 	client     *dynamodb.DynamoDB
 }
 
+func (d Dynamo) String() string {
+	return "Dynamo"
+}
+
 func NewDynamo(tableName string) (*Dynamo, error) {
 	awsSession, err := session.NewSession()
 	if err != nil {
