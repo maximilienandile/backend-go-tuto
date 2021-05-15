@@ -61,6 +61,7 @@ func New(config Config) (*Server, error) {
 	engine.PUT("/admin/inventory", s.UpdateInventory)
 	engine.GET("/me/cart", s.AuthenticateV2, s.GetCartOfUser)
 	engine.PUT("/me/cart", s.AuthenticateV2, s.UpdateCartOfUser)
+	engine.POST("/checkout", s.Checkout)
 	return s, nil
 }
 
