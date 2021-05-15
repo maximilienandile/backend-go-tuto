@@ -20,13 +20,13 @@ type Server struct {
 	Engine        *gin.Engine
 	port          uint
 	allowedOrigin string
-	storage       *storage.Dynamo
+	storage       storage.Storage
 }
 
 type Config struct {
 	Port          uint
 	AllowedOrigin string
-	Storage       *storage.Dynamo
+	Storage       storage.Storage
 }
 
 func New(config Config) (*Server, error) {
