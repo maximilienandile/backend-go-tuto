@@ -1,8 +1,11 @@
 package main
 
 import (
+	"net/http"
+
 	"github.com/Rhymond/go-money"
 	"github.com/gin-gonic/gin"
+	"github.com/maximilienandile/backend-go-tuto/internal/category"
 	"github.com/maximilienandile/backend-go-tuto/internal/product"
 )
 
@@ -12,6 +15,22 @@ func main() {
 		c.JSON(200, gin.H{
 			"hello": "world",
 		})
+	})
+	r.GET("/categories", func(c *gin.Context) {
+		categories := []category.Category{
+			{
+				ID:          "42",
+				Name:        "Plushies",
+				Description: "kdsjdjsidjisdj",
+			},
+			{
+				ID:          "43",
+				Name:        "T-Shirts",
+				Description: "kdsjdjsidjisdj",
+			},
+		}
+		c.Header("Access-Control-Allow-Origin", "http://localhost:8080")
+		c.JSON(http.StatusOK, categories)
 	})
 	r.GET("/products", func(c *gin.Context) {
 		products := []product.Product{
