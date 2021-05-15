@@ -92,3 +92,31 @@ func (mr *MockStorageMockRecorder) Products() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Products", reflect.TypeOf((*MockStorage)(nil).Products))
 }
+
+// UpdateInventory mocks base method.
+func (m *MockStorage) UpdateInventory(productID string, delta int) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateInventory", productID, delta)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateInventory indicates an expected call of UpdateInventory.
+func (mr *MockStorageMockRecorder) UpdateInventory(productID, delta interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateInventory", reflect.TypeOf((*MockStorage)(nil).UpdateInventory), productID, delta)
+}
+
+// UpdateProduct mocks base method.
+func (m *MockStorage) UpdateProduct(input UpdateProductInput) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateProduct", input)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateProduct indicates an expected call of UpdateProduct.
+func (mr *MockStorageMockRecorder) UpdateProduct(input interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateProduct", reflect.TypeOf((*MockStorage)(nil).UpdateProduct), input)
+}

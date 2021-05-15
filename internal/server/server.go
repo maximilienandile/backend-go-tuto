@@ -47,6 +47,7 @@ func New(config Config) (*Server, error) {
 	engine.GET("/categories", s.Categories)
 	engine.GET("/products", s.Products)
 	engine.POST("/admin/products", s.CreateProduct)
+	engine.PUT("/admin/product/:productId", s.UpdateProduct)
 	engine.POST("/admin/categories", s.CreateCategories)
 	engine.PUT("/admin/inventory", s.UpdateInventory)
 	return s, nil
@@ -126,4 +127,44 @@ func (s *Server) CreateCategories(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, categoryToSave)
+}
+
+type UpdateProductInput struct {
+	Name             string         `json:"name"`
+	Image            string         `json:"image"`
+	ShortDescription string         `json:"shortDescription"`
+	Description      string         `json:"description"`
+	PriceVATExcluded product.Amount `json:"priceVatExcluded"`
+	VAT              product.Amount `json:"vat"`
+	TotalPrice       product.Amount `json:"totalPrice"`
+}
+
+func (s *Server) UpdateProduct(c *gin.Context) {
+	var input UpdateProductInput
+	err := c.BindJSON(&input)
+	if err != nil {
+		log.Printf("error while binding JSON: %s \n", err)
+		return
+	}
+	productID := c.Param("productId")
+	if productID == "" {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "productId is mandatory"})
+		return
+	}
+	err = s.storage.UpdateProduct(storage.UpdateProductInput{
+		ProductID:        productID,
+		Name:             input.Name,
+		Image:            input.Image,
+		ShortDescription: input.ShortDescription,
+		Description:      input.Description,
+		PriceVATExcluded: input.PriceVATExcluded,
+		VAT:              input.VAT,
+		TotalPrice:       input.TotalPrice,
+	})
+	if err != nil {
+		log.Printf("error occured while updating the product: %s \n", err)
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "impossible to update product"})
+		return
+	}
+	c.Status(http.StatusNoContent)
 }

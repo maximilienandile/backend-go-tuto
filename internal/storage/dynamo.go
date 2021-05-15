@@ -131,3 +131,50 @@ func (d *Dynamo) getElementsByPK(pkAttributeValue string) (*dynamodb.QueryOutput
 	}
 	return out, nil
 }
+
+func (d *Dynamo) UpdateProduct(input UpdateProductInput) error {
+	// get product in db
+	productFound, err := d.getProductByID(input.ProductID)
+	if err != nil {
+		return fmt.Errorf("impossible to retrive product %w", err)
+	}
+	// key condition
+	keyCondition := make(map[string]*dynamodb.AttributeValue)
+	// PK
+	keyCondition[partitionKeyAttributeName] = &dynamodb.AttributeValue{S: aws.String(pkProduct)}
+	// SK
+	keyCondition[sortKeyAttributeName] = &dynamodb.AttributeValue{S: aws.String(input.ProductID)}
+
+	// condition expression
+	condition := expression.Name("version").Equal(expression.Value(productFound.Version))
+
+	// update expression (what we need to update)
+	update := expression.Set(expression.Name("name"), expression.Value(input.Name))
+	update.Set(expression.Name("version"), expression.Value(productFound.Version+1))
+	update.Set(expression.Name("image"), expression.Value(input.Image))
+	update.Set(expression.Name("shortDescription"), expression.Value(input.ShortDescription))
+	update.Set(expression.Name("priceVatExcluded"), expression.Value(input.PriceVATExcluded))
+	update.Set(expression.Name("vat"), expression.Value(input.VAT))
+	update.Set(expression.Name("totalPrice"), expression.Value(input.TotalPrice))
+
+	// build expressions with expression builders
+	builder := expression.NewBuilder().WithCondition(condition).WithUpdate(update)
+	expr, err := builder.Build()
+	if err != nil {
+		return fmt.Errorf("impossible to build expression: %w", err)
+	}
+	// request UpdateItem
+	inputDB := dynamodb.UpdateItemInput{
+		ExpressionAttributeNames:  expr.Names(),
+		ExpressionAttributeValues: expr.Values(),
+		Key:                       keyCondition,
+		TableName:                 &d.tableName,
+		ConditionExpression:       expr.Condition(),
+		UpdateExpression:          expr.Update(),
+	}
+	_, err = d.client.UpdateItem(&inputDB)
+	if err != nil {
+		return fmt.Errorf("impossible to run UpdateItem request: %w", err)
+	}
+	return nil
+}
