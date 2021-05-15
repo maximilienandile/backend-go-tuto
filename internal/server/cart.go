@@ -30,6 +30,29 @@ func (s Server) GetCartOfUser(c *gin.Context) {
 
 }
 
-func (s Server) UpdateCartOfUser(c *gin.Context) {
+type UpdateCartOfUserInput struct {
+	ProductID string `json:"productId"`
+	Delta     int    `json:"delta"`
+}
 
+func (s Server) UpdateCartOfUser(c *gin.Context) {
+	var input UpdateCartOfUserInput
+	err := c.BindJSON(&input)
+	if err != nil {
+		log.Printf("error while binding JSON: %s \n", err)
+		return
+	}
+	currentUser, err := s.currentUser(c)
+	if err != nil {
+		log.Printf("impossible to retrieve current user: %s", err)
+		c.AbortWithStatus(http.StatusForbidden)
+		return
+	}
+	cartUpdated, err := s.storage.CreateOrUpdateCart(currentUser.ID, input.ProductID, input.Delta)
+	if err != nil {
+		log.Printf("impossible to create or update cart: %s", err)
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+	c.JSON(http.StatusOK, cartUpdated)
 }

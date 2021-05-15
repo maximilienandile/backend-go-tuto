@@ -261,13 +261,16 @@ func (d *Dynamo) CreateOrUpdateCart(userID string, productID string, delta int) 
 		if errors.Is(err, ErrNotFound) {
 			// the cart is not found
 			// we have to create it
-			cartFound = cart.Cart{}
+			cartFound = cart.Cart{
+				Version: 1,
+			}
 			err = d.CreateCart(cartFound, userID)
 			if err != nil {
 				return cart.Cart{}, fmt.Errorf("cart not found, impossible to create a new cart: %w", err)
 			}
+		} else {
+			return cart.Cart{}, fmt.Errorf("impossible to retrieve the cart: %w", err)
 		}
-		return cart.Cart{}, fmt.Errorf("impossible to retrieve the cart: %w", err)
 	}
 	// next is to add/ remove the item from the cart
 	err = cartFound.UpsertItem(productID, delta)
