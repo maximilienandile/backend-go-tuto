@@ -2,6 +2,7 @@ package server
 
 import (
 	"errors"
+	"log"
 	"net/http"
 	"strings"
 
@@ -50,7 +51,69 @@ func (s Server) AuthenticateV2(c *gin.Context) {
 		c.AbortWithStatus(http.StatusForbidden)
 		return
 	}
-	c.Set(userKeyContext, user.User{ID: token.UID})
+	emailFound, found := token.Claims["email"]
+	if !found {
+		log.Println("impossible to find email claim")
+		c.AbortWithStatus(http.StatusForbidden)
+		return
+	}
+	email, ok := emailFound.(string)
+	if !ok {
+		log.Println("impossible to check that concrete type under email claim is a string")
+		c.AbortWithStatus(http.StatusForbidden)
+		return
+	}
+
+	isVerifiedFound, found := token.Claims["email_verified"]
+	if !found {
+		log.Println("impossible to find email_verified claim")
+		c.AbortWithStatus(http.StatusForbidden)
+		return
+	}
+	emailVerified, ok := isVerifiedFound.(bool)
+	if !ok {
+		log.Println("impossible to check that concrete type under email_verified claim is a bool")
+		c.AbortWithStatus(http.StatusForbidden)
+		return
+	}
+	c.Set(userKeyContext, user.User{
+		ID:             token.UID,
+		SigninProvider: token.Firebase.SignInProvider,
+		Email:          email,
+		EmailVerified:  emailVerified,
+	})
+	c.Next()
+}
+
+func (s Server) AuthenticateAdmin(c *gin.Context) {
+	currentUser, err := s.currentUser(c)
+	if err != nil {
+		log.Println("impossible to retrieve user in context")
+		c.AbortWithStatus(http.StatusForbidden)
+		return
+	}
+	var adminEmailFound bool
+	for _, adminEmail := range s.adminEmails {
+		if currentUser.Email == adminEmail {
+			adminEmailFound = true
+			break
+		}
+	}
+	if !adminEmailFound {
+		log.Println("impossible to find email in the admin list")
+		c.AbortWithStatus(http.StatusForbidden)
+		return
+	}
+	if !currentUser.EmailVerified {
+		log.Println("email in admin list but not verified")
+		c.AbortWithStatus(http.StatusForbidden)
+		return
+	}
+	if currentUser.SigninProvider != "google.com" {
+		log.Println("signin provider is not google.com")
+		c.AbortWithStatus(http.StatusForbidden)
+		return
+	}
 	c.Next()
 }
 

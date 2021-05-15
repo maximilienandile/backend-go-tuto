@@ -8,6 +8,7 @@ provider:
     ALLOWED_ORIGIN: ${opt:allowedOrigin}
     PARAMETER_STORE_NAME: /ecommerce/${opt:stage}/secrets
     EMAIL_FROM: ${opt:emailFrom}
+    ADMIN_EMAILS: ${opt:adminEmails}
   iam:
     role:
       statements:

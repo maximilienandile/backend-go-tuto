@@ -34,6 +34,7 @@ type Server struct {
 	frontendBaseUrl               string
 	emailSender                   email.Sender
 	emailFrom                     string
+	adminEmails                   []string
 }
 
 type Config struct {
@@ -47,6 +48,7 @@ type Config struct {
 	FrontendBaseUrl               string
 	EmailSender                   email.Sender
 	EmailFrom                     string
+	AdminEmails                   []string
 }
 
 func New(config Config) (*Server, error) {
@@ -63,6 +65,7 @@ func New(config Config) (*Server, error) {
 		frontendBaseUrl:               config.FrontendBaseUrl,
 		emailSender:                   config.EmailSender,
 		emailFrom:                     config.EmailFrom,
+		adminEmails:                   config.AdminEmails,
 	}
 	engine.Use(s.CORSMiddleware, s.MiddlewareServerModel)
 	// Create a new middleware
@@ -72,15 +75,17 @@ func New(config Config) (*Server, error) {
 	engine.GET("/categories", s.Categories)
 	engine.GET("/products", s.Products)
 	engine.GET("/product/:id", s.GetProductByID)
-	engine.POST("/admin/products", s.CreateProduct)
-	engine.PUT("/admin/product/:productId", s.UpdateProduct)
-	engine.POST("/admin/categories", s.CreateCategories)
-	engine.PUT("/admin/inventory", s.UpdateInventory)
+
 	engine.GET("/me/cart", s.AuthenticateV2, s.GetCartOfUser)
 	engine.PUT("/me/cart", s.AuthenticateV2, s.UpdateCartOfUser)
 	engine.POST("/checkout", s.AuthenticateV2, s.Checkout)
 	engine.POST("/webhooks/stripe", s.HandleStripeWebhook)
 	engine.GET("/testEmail", s.SendTestEmail)
+
+	engine.POST("/admin/products", s.AuthenticateV2, s.AuthenticateAdmin, s.CreateProduct)
+	engine.PUT("/admin/product/:productId", s.AuthenticateV2, s.AuthenticateAdmin, s.UpdateProduct)
+	engine.POST("/admin/categories", s.AuthenticateV2, s.AuthenticateAdmin, s.CreateCategories)
+	engine.PUT("/admin/inventory", s.AuthenticateV2, s.AuthenticateAdmin, s.UpdateInventory)
 	return s, nil
 }
 

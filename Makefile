@@ -18,7 +18,8 @@ deploy_dev: build
 	--stage dev \
 	--ssmEncryptionKeyId 7a8dbbad-bae9-480c-af13-d7a14bb70a71 \
 	--frontendBaseUrl http://localhost:8080 \
-	--emailFrom maximilien.andile.demo@gmail.com
+	--emailFrom maximilien.andile.demo@gmail.com \
+	--adminEmails maximilien.andile.demo@gmail.com
 
 genMocks:
 	mockgen -source=internal/storage/interface.go -destination=internal/storage/mock.go -package=storage

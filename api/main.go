@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/maximilienandile/backend-go-tuto/internal/email"
 
@@ -87,6 +88,11 @@ func init() {
 		log.Fatal("env variable EMAIL_FROM was not found")
 	}
 
+	adminEmails, found := os.LookupEnv("ADMIN_EMAILS")
+	if !found {
+		log.Fatal("env variable ADMIN_EMAILS was not found")
+	}
+
 	myServer, err := server.New(server.Config{
 		Port:                          9090,
 		AllowedOrigin:                 allowedOrigin,
@@ -98,6 +104,7 @@ func init() {
 		FrontendBaseUrl:               frontendBaseURL,
 		EmailSender:                   emailSender,
 		EmailFrom:                     emailFrom,
+		AdminEmails:                   strings.Split(adminEmails, ","),
 	})
 	if err != nil {
 		log.Fatalf("impossible to create the server: %s", err)
