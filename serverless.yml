@@ -18,5 +18,5 @@ functions:
           path: /products
           method: get
       - http:
-          path: /categoris
+          path: /categories
           method: get
