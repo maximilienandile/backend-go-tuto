@@ -56,3 +56,6 @@ functions:
       - http:
           path: /me/cart
           method: put
+      - http:
+          path: /product/{id}
+          method: get

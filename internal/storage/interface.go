@@ -27,4 +27,5 @@ type Storage interface {
 	CreateCart(cart cart.Cart, userID string) error
 	GetCart(userID string) (cart.Cart, error)
 	CreateOrUpdateCart(userID string, productID string, delta int) (cart.Cart, error)
+	Product(ID string) (product.Product, error)
 }

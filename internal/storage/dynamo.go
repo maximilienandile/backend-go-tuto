@@ -402,3 +402,7 @@ func (d Dynamo) buildUpdateCartRequest(updatedCart cart.Cart, userID string) (*d
 		}}
 	return updateCart, nil
 }
+
+func (d Dynamo) Product(ID string) (product.Product, error) {
+	return d.getProductByID(ID)
+}

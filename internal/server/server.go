@@ -1,6 +1,7 @@
 package server
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -46,6 +47,7 @@ func New(config Config) (*Server, error) {
 	// Header value should be : Gin
 	engine.GET("/categories", s.Categories)
 	engine.GET("/products", s.Products)
+	engine.GET("/product/:id", s.GetProductByID)
 	engine.POST("/admin/products", s.CreateProduct)
 	engine.PUT("/admin/product/:productId", s.UpdateProduct)
 	engine.POST("/admin/categories", s.CreateCategories)
@@ -160,4 +162,24 @@ func (s *Server) UpdateProduct(c *gin.Context) {
 		return
 	}
 	c.Status(http.StatusNoContent)
+}
+
+func (s *Server) GetProductByID(c *gin.Context) {
+	// first we need to the id
+	productID := c.Param("id")
+	if productID == "" {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "productId is mandatory"})
+		return
+	}
+	productFound, err := s.storage.Product(productID)
+	if err != nil {
+		if errors.Is(err, storage.ErrNotFound) {
+			c.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": "product not retrieved"})
+			return
+		}
+		log.Printf("impossible to retrieve product: %s", err)
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+	c.JSON(http.StatusOK, productFound)
 }
