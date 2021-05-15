@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
+	"github.com/aws/aws-sdk-go/service/dynamodb/expression"
 
 	"github.com/aws/aws-sdk-go/aws/session"
 
@@ -11,6 +12,9 @@ import (
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/maximilienandile/backend-go-tuto/internal/product"
 )
+
+const partitionKeyAttributeName = "PK"
+const pkProduct = "product"
 
 type Dynamo struct {
 	tableName  string
@@ -40,8 +44,8 @@ func (d *Dynamo) CreateProduct(product product.Product) error {
 	if err != nil {
 		return fmt.Errorf("impossible to marshall product: %w", err)
 	}
-	item["PK"] = &dynamodb.AttributeValue{
-		S: aws.String("product"),
+	item[partitionKeyAttributeName] = &dynamodb.AttributeValue{
+		S: aws.String(pkProduct),
 	}
 	item["SK"] = &dynamodb.AttributeValue{
 		S: aws.String(product.ID),
@@ -54,4 +58,30 @@ func (d *Dynamo) CreateProduct(product product.Product) error {
 		return fmt.Errorf("impossible to Put item in db: %w", err)
 	}
 	return nil
+}
+
+func (d *Dynamo) Products() ([]product.Product, error) {
+	// PK = :myValue
+	keyCondition := expression.Key(partitionKeyAttributeName).Equal(expression.Value(pkProduct))
+	builder := expression.NewBuilder().WithKeyCondition(keyCondition)
+	expr, err := builder.Build()
+	if err != nil {
+		return nil, fmt.Errorf("impossible to build expression: %s", err)
+	}
+	input := dynamodb.QueryInput{
+		KeyConditionExpression:    expr.KeyCondition(),
+		ExpressionAttributeNames:  expr.Names(),
+		ExpressionAttributeValues: expr.Values(),
+		TableName:                 &d.tableName,
+	}
+	out, err := d.client.Query(&input)
+	if err != nil {
+		return nil, fmt.Errorf("impossible to query database: %s", err)
+	}
+	products := make([]product.Product, 0)
+	err = dynamodbattribute.UnmarshalListOfMaps(out.Items, &products)
+	if err != nil {
+		return nil, fmt.Errorf("impossible to unmarshall results: %s", err)
+	}
+	return products, nil
 }

@@ -9,7 +9,6 @@ import (
 
 	"github.com/maximilienandile/backend-go-tuto/internal/storage"
 
-	"github.com/Rhymond/go-money"
 	"github.com/maximilienandile/backend-go-tuto/internal/product"
 
 	"github.com/gin-gonic/gin"
@@ -89,69 +88,13 @@ func (s *Server) Categories(c *gin.Context) {
 }
 
 func (s *Server) Products(c *gin.Context) {
-
-	twoEuro := money.New(200, "EUR")
-	fourEuros := money.New(400, "EUR")
-	products := []product.Product{
-		{
-			ID:               "42",
-			Name:             "Test",
-			Image:            "https://www.practical-go-lessons.com/img/practical-go-lessons-book10.a8a05387.jpg",
-			ShortDescription: "New",
-			Description:      "This is my product",
-			PriceVATExcluded: product.Amount{
-				Money:   twoEuro,
-				Display: twoEuro.Display(),
-			},
-			VAT: product.Amount{
-				Money:   twoEuro,
-				Display: twoEuro.Display(),
-			},
-			TotalPrice: product.Amount{
-				Money:   fourEuros,
-				Display: fourEuros.Display(),
-			},
-		},
-		{
-			ID:               "43",
-			Name:             "Test",
-			Description:      "This is my product",
-			Image:            "https://www.practical-go-lessons.com/img/practical-go-lessons-book10.a8a05387.jpg",
-			ShortDescription: "New",
-			PriceVATExcluded: product.Amount{
-				Money:   twoEuro,
-				Display: twoEuro.Display(),
-			},
-			VAT: product.Amount{
-				Money:   twoEuro,
-				Display: twoEuro.Display(),
-			},
-			TotalPrice: product.Amount{
-				Money:   fourEuros,
-				Display: fourEuros.Display(),
-			},
-		},
-		{
-			ID:               "44",
-			Name:             "Test",
-			Image:            "https://www.practical-go-lessons.com/img/practical-go-lessons-book10.a8a05387.jpg",
-			ShortDescription: "on Sale !",
-			Description:      "This is my product",
-			PriceVATExcluded: product.Amount{
-				Money:   twoEuro,
-				Display: twoEuro.Display(),
-			},
-			VAT: product.Amount{
-				Money:   twoEuro,
-				Display: twoEuro.Display(),
-			},
-			TotalPrice: product.Amount{
-				Money:   fourEuros,
-				Display: fourEuros.Display(),
-			},
-		},
+	products, err := s.storage.Products()
+	if err != nil {
+		log.Printf("impossible to get the products: %s", err)
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
 	}
-	c.JSON(200, products)
+	c.JSON(http.StatusOK, products)
 }
 
 func (s *Server) CreateProduct(c *gin.Context) {

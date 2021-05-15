@@ -47,3 +47,18 @@ func (mr *MockStorageMockRecorder) CreateProduct(product interface{}) *gomock.Ca
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateProduct", reflect.TypeOf((*MockStorage)(nil).CreateProduct), product)
 }
+
+// Products mocks base method.
+func (m *MockStorage) Products() ([]product.Product, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Products")
+	ret0, _ := ret[0].([]product.Product)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Products indicates an expected call of Products.
+func (mr *MockStorageMockRecorder) Products() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Products", reflect.TypeOf((*MockStorage)(nil).Products))
+}
