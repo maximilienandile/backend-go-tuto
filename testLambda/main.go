@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"time"
 
 	"github.com/aws/aws-lambda-go/lambda"
 )
@@ -11,7 +12,8 @@ type MyEvent struct {
 }
 
 func HandleRequest(ctx context.Context, event MyEvent) (string, error) {
-	return "ABC", nil
+	m := time.Month(event.MonthNumber)
+	return m.String(), nil
 }
 
 func main() {
