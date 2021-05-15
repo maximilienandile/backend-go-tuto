@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"os"
 
 	"github.com/aws/aws-lambda-go/lambda"
 
@@ -16,8 +17,13 @@ import (
 var ginLambda *ginadapter.GinLambda
 
 func init() {
+	allowedOrigin, found := os.LookupEnv("ALLOWED_ORIGIN")
+	if !found {
+		log.Fatal("env variable ALLOWED_ORIGIN was not found")
+	}
 	myServer, err := server.New(server.Config{
-		Port: 9090,
+		Port:          9090,
+		AllowedOrigin: allowedOrigin,
 	})
 	if err != nil {
 		log.Fatalf("impossible to create the server: %s", err)

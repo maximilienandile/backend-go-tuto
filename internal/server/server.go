@@ -12,19 +12,22 @@ import (
 )
 
 type Server struct {
-	Engine *gin.Engine
-	port   uint
+	Engine        *gin.Engine
+	port          uint
+	allowedOrigin string
 }
 
 type Config struct {
-	Port uint
+	Port          uint
+	AllowedOrigin string
 }
 
 func New(config Config) (*Server, error) {
 	engine := gin.Default()
 	s := &Server{
-		Engine: engine,
-		port:   config.Port,
+		Engine:        engine,
+		port:          config.Port,
+		allowedOrigin: config.AllowedOrigin,
 	}
 	engine.GET("/categories", s.Categories)
 	engine.GET("/products", s.Products)
@@ -48,7 +51,7 @@ func (s *Server) Categories(c *gin.Context) {
 			Description: "kdsjdjsidjisdj",
 		},
 	}
-	c.Header("Access-Control-Allow-Origin", "https://dev.d1vkjnwaib9pzo.amplifyapp.com")
+	c.Header("Access-Control-Allow-Origin", s.allowedOrigin)
 	c.JSON(http.StatusOK, categories)
 }
 
@@ -114,6 +117,6 @@ func (s *Server) Products(c *gin.Context) {
 			},
 		},
 	}
-	c.Header("Access-Control-Allow-Origin", "https://dev.d1vkjnwaib9pzo.amplifyapp.com")
+	c.Header("Access-Control-Allow-Origin", s.allowedOrigin)
 	c.JSON(200, products)
 }

@@ -3,6 +3,8 @@ provider:
   name: aws
   runtime: go1.x
   region: eu-west-1
+  environment:
+    ALLOWED_ORIGIN: ${opt:allowedOrigin}
 package:
   exclude:
     - ./**
