@@ -12,7 +12,7 @@ deploy: build
 	serverless deploy --aws-profile maxaldtools
 
 deploy_dev: build
-	serverless deploy --aws-profile maxaldtools --allowedOrigin http://localhost:8080 --stage dev
+	serverless deploy --aws-profile maxaldtools --allowedOrigin http://localhost:8080 --stage dev --ssmEncryptionKeyId 7a8dbbad-bae9-480c-af13-d7a14bb70a71
 
 genMocks:
 	mockgen -source=internal/storage/interface.go -destination=internal/storage/mock.go -package=storage

@@ -6,6 +6,8 @@ import (
 	"log"
 	"net/http"
 
+	"firebase.google.com/go/v4/auth"
+
 	"github.com/maximilienandile/backend-go-tuto/internal/extMoney"
 
 	"github.com/maximilienandile/backend-go-tuto/internal/uniqueid"
@@ -19,28 +21,31 @@ import (
 )
 
 type Server struct {
-	Engine            *gin.Engine
-	port              uint
-	allowedOrigin     string
-	storage           storage.Storage
-	uniqueIDGenerator uniqueid.Generator
+	Engine             *gin.Engine
+	port               uint
+	allowedOrigin      string
+	storage            storage.Storage
+	uniqueIDGenerator  uniqueid.Generator
+	firebaseAuthClient *auth.Client
 }
 
 type Config struct {
-	Port              uint
-	AllowedOrigin     string
-	Storage           storage.Storage
-	UniqueIDGenerator uniqueid.Generator
+	Port               uint
+	AllowedOrigin      string
+	Storage            storage.Storage
+	UniqueIDGenerator  uniqueid.Generator
+	FirebaseAuthClient *auth.Client
 }
 
 func New(config Config) (*Server, error) {
 	engine := gin.Default()
 	s := &Server{
-		Engine:            engine,
-		port:              config.Port,
-		allowedOrigin:     config.AllowedOrigin,
-		storage:           config.Storage,
-		uniqueIDGenerator: config.UniqueIDGenerator,
+		Engine:             engine,
+		port:               config.Port,
+		allowedOrigin:      config.AllowedOrigin,
+		storage:            config.Storage,
+		uniqueIDGenerator:  config.UniqueIDGenerator,
+		firebaseAuthClient: config.FirebaseAuthClient,
 	}
 	engine.Use(s.CORSMiddleware, s.MiddlewareServerModel)
 	// Create a new middleware
