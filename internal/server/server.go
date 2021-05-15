@@ -124,6 +124,20 @@ func (s *Server) CreateProduct(c *gin.Context) {
 		return
 	}
 	productToAdd.ID = s.uniqueIDGenerator.Generate()
+	// recompute total price
+	vatInput := productToAdd.VAT.ToMoney()
+	priceVatExc := productToAdd.PriceVATExcluded.ToMoney()
+
+	totalPrice, err := priceVatExc.Add(vatInput)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "impossible to add VAT + Price VAT exc"})
+		return
+	}
+	// reset the Display property
+	productToAdd.VAT.Display = vatInput.Display()
+	productToAdd.PriceVATExcluded.Display = priceVatExc.Display()
+
+	productToAdd.TotalPrice = extMoney.FromMoney(totalPrice)
 	err = s.storage.CreateProduct(productToAdd)
 	if err != nil {
 		//
