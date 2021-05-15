@@ -11,3 +11,12 @@ package:
 functions:
   hello:
     handler: bin/hello
+  api:
+    handler: bin/api
+    events:
+      - http:
+          path: /products
+          method: get
+      - http:
+          path: /categoris
+          method: get
