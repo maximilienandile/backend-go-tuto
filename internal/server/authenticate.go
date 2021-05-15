@@ -3,6 +3,7 @@ package server
 import (
 	"errors"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/maximilienandile/backend-go-tuto/internal/user"
@@ -31,6 +32,25 @@ func (s Server) Authenticate(c *gin.Context) {
 		return
 	}
 	c.Set(userKeyContext, user.User{ID: username})
+	c.Next()
+}
+
+func (s Server) AuthenticateV2(c *gin.Context) {
+	authorizationHeader := c.GetHeader("Authorization")
+	// 'Bearer XXXXX'
+	splits := strings.Split(authorizationHeader, " ")
+	if len(splits) != 2 {
+		c.AbortWithStatus(http.StatusForbidden)
+		return
+	}
+	// splits[0] = 'Bearer'
+	// splits[1] = 'XXXXX' < the idToken
+	token, err := s.firebaseAuthClient.VerifyIDToken(c.Request.Context(), splits[1])
+	if err != nil {
+		c.AbortWithStatus(http.StatusForbidden)
+		return
+	}
+	c.Set(userKeyContext, user.User{ID: token.UID})
 	c.Next()
 }
 
