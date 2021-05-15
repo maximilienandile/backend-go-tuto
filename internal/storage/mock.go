@@ -79,6 +79,21 @@ func (mr *MockStorageMockRecorder) CreateCategory(category interface{}) *gomock.
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateCategory", reflect.TypeOf((*MockStorage)(nil).CreateCategory), category)
 }
 
+// CreateOrUpdateCart mocks base method.
+func (m *MockStorage) CreateOrUpdateCart(userID, productID string, delta int) (cart.Cart, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateOrUpdateCart", userID, productID, delta)
+	ret0, _ := ret[0].(cart.Cart)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CreateOrUpdateCart indicates an expected call of CreateOrUpdateCart.
+func (mr *MockStorageMockRecorder) CreateOrUpdateCart(userID, productID, delta interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateOrUpdateCart", reflect.TypeOf((*MockStorage)(nil).CreateOrUpdateCart), userID, productID, delta)
+}
+
 // CreateProduct mocks base method.
 func (m *MockStorage) CreateProduct(product product.Product) error {
 	m.ctrl.T.Helper()

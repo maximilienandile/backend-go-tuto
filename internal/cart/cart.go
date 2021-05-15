@@ -25,6 +25,12 @@ func (c Cart) TotalPriceVATInc() (*money.Money, error) {
 	return totalPrice, nil
 }
 
+func (c *Cart) UpsertItem(productID string, delta int) error {
+	// handle the logic to add an item to a cart
+
+	return nil
+}
+
 type Item struct {
 	ID               string
 	ShortDescription string

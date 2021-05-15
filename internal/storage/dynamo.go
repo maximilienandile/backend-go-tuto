@@ -1,7 +1,10 @@
 package storage
 
 import (
+	"errors"
 	"fmt"
+
+	uuid "github.com/satori/go.uuid"
 
 	"github.com/maximilienandile/backend-go-tuto/internal/cart"
 
@@ -141,7 +144,7 @@ func (d *Dynamo) getElementsByPKAndSK(pkAttributeValue, skAttributeValue string)
 	// PK = :myValue
 	keyCondition := expression.Key(partitionKeyAttributeName).Equal(expression.Value(pkAttributeValue))
 	sortKeyCondition := expression.Key(sortKeyAttributeName).Equal(expression.Value(skAttributeValue))
-	keyCondition.And(sortKeyCondition)
+	keyCondition = keyCondition.And(sortKeyCondition)
 	builder := expression.NewBuilder().WithKeyCondition(keyCondition)
 	expr, err := builder.Build()
 	if err != nil {
@@ -248,4 +251,68 @@ func (d *Dynamo) GetCart(userID string) (cart.Cart, error) {
 		return cart.Cart{}, fmt.Errorf("impossible to unmarshall cart: %w", err)
 	}
 	return cartRetrieved, nil
+}
+
+func (d *Dynamo) CreateOrUpdateCart(userID string, productID string, delta int) (cart.Cart, error) {
+	// retrieve the cart of the user
+	// if we do not find it then we create one
+	cartFound, err := d.GetCart(userID)
+	if err != nil {
+		if errors.Is(err, ErrNotFound) {
+			// the cart is not found
+			// we have to create it
+			cartFound = cart.Cart{}
+			err = d.CreateCart(cartFound, userID)
+			if err != nil {
+				return cart.Cart{}, fmt.Errorf("cart not found, impossible to create a new cart: %w", err)
+			}
+		}
+		return cart.Cart{}, fmt.Errorf("impossible to retrieve the cart: %w", err)
+	}
+	// next is to add/ remove the item from the cart
+	err = cartFound.UpsertItem(productID, delta)
+	if err != nil {
+		return cart.Cart{}, fmt.Errorf("impossible to add/remove item to the cart: %w", err)
+	}
+	productDB, err := d.getProductByID(productID)
+	if err != nil {
+		return cart.Cart{}, fmt.Errorf("impossible to retrieve the product of id %s: %w", productID, err)
+	}
+
+	// slice of actions in the transaction
+	actions := make([]*dynamodb.TransactWriteItem, 0)
+	// update stock query
+	updateStockReq, err := d.buildUpdateStockQuery(productDB, delta)
+	if err != nil {
+		return cart.Cart{}, fmt.Errorf("impossible to build the update stock request: %w", err)
+	}
+	actions = append(actions, updateStockReq)
+
+	// update cart query
+	updateCartReq, err := d.buildUpdateCartRequest(cartFound, userID)
+	if err != nil {
+		return cart.Cart{}, fmt.Errorf("impossible to build the update cart request: %w", err)
+	}
+	actions = append(actions, updateCartReq)
+	// group that into a transaction
+	// execute the transaction
+	_, err = d.client.TransactWriteItems(&dynamodb.TransactWriteItemsInput{
+		TransactItems:      actions,
+		ClientRequestToken: aws.String(uuid.NewV4().String()),
+	})
+	if err != nil {
+		return cart.Cart{}, fmt.Errorf("impossible to run the transaction: %w", err)
+	}
+
+	return cartFound, nil
+}
+
+func (d Dynamo) buildUpdateStockQuery(productDB product.Product, delta int) (*dynamodb.TransactWriteItem, error) {
+
+	return nil, nil
+}
+
+func (d Dynamo) buildUpdateCartRequest(updatedCart cart.Cart, userID string) (*dynamodb.TransactWriteItem, error) {
+
+	return nil, nil
 }
