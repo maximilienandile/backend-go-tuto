@@ -27,6 +27,8 @@ type Server struct {
 	storage            storage.Storage
 	uniqueIDGenerator  uniqueid.Generator
 	firebaseAuthClient *auth.Client
+	stripeSecretKey    string
+	frontendBaseUrl    string
 }
 
 type Config struct {
@@ -35,6 +37,8 @@ type Config struct {
 	Storage            storage.Storage
 	UniqueIDGenerator  uniqueid.Generator
 	FirebaseAuthClient *auth.Client
+	StripeSecretKey    string
+	FrontendBaseUrl    string
 }
 
 func New(config Config) (*Server, error) {
@@ -46,6 +50,8 @@ func New(config Config) (*Server, error) {
 		storage:            config.Storage,
 		uniqueIDGenerator:  config.UniqueIDGenerator,
 		firebaseAuthClient: config.FirebaseAuthClient,
+		stripeSecretKey:    config.StripeSecretKey,
+		frontendBaseUrl:    config.FrontendBaseUrl,
 	}
 	engine.Use(s.CORSMiddleware, s.MiddlewareServerModel)
 	// Create a new middleware

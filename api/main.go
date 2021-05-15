@@ -71,6 +71,10 @@ func init() {
 	if err != nil {
 		log.Fatalf("impossible to build auth client: %s", err)
 	}
+	frontendBaseURL, found := os.LookupEnv("FRONTEND_BASE_URL")
+	if !found {
+		log.Fatal("env variable FRONTEND_BASE_URL was not found")
+	}
 
 	myServer, err := server.New(server.Config{
 		Port:               9090,
@@ -78,6 +82,8 @@ func init() {
 		Storage:            dynamoStorage,
 		UniqueIDGenerator:  uniqueid.UUIDV4{},
 		FirebaseAuthClient: authClient,
+		StripeSecretKey:    secretsFromSSM.StripeSecretKey,
+		FrontendBaseUrl:    frontendBaseURL,
 	})
 	if err != nil {
 		log.Fatalf("impossible to create the server: %s", err)

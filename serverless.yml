@@ -4,6 +4,7 @@ provider:
   runtime: go1.x
   region: eu-west-1
   environment:
+    FRONTEND_BASE_URL: ${opt:frontendBaseUrl}
     ALLOWED_ORIGIN: ${opt:allowedOrigin}
     PARAMETER_STORE_NAME: /ecommerce/${opt:stage}/secrets
   iam:

@@ -1,8 +1,13 @@
 package server
 
 import (
+	"fmt"
 	"log"
 	"net/http"
+
+	"github.com/stripe/stripe-go/v72/checkout/session"
+
+	"github.com/stripe/stripe-go/v72"
 
 	"github.com/gin-gonic/gin"
 )
@@ -11,6 +16,10 @@ type CheckoutInput struct {
 	Provider            string `json:"provider"`
 	ShippingCountryCode string `json:"shippingCountryCode"`
 	Currency            string `json:"currency"`
+}
+
+type CheckoutOutput struct {
+	SessionId string `json:"sessionId"`
 }
 
 func (s Server) Checkout(c *gin.Context) {
@@ -34,6 +43,41 @@ func (s Server) Checkout(c *gin.Context) {
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
-	log.Println(cartRetrieved)
-	c.Status(http.StatusOK)
+	lines := make([]*stripe.CheckoutSessionLineItemParams, 0)
+	for _, item := range cartRetrieved.Items {
+		var line stripe.CheckoutSessionLineItemParams
+		line.PriceData = &stripe.CheckoutSessionLineItemPriceDataParams{
+			Currency: stripe.String(cartRetrieved.CurrencyCode),
+			ProductData: &stripe.CheckoutSessionLineItemPriceDataProductDataParams{
+				Description: stripe.String(item.ShortDescription),
+				Name:        stripe.String(item.Title),
+			},
+			UnitAmount: &item.UnitPriceVATInc.Amount,
+		}
+		qty := int64(item.Quantity)
+		line.Quantity = &qty
+		lines = append(lines, &line)
+	}
+
+	params := stripe.CheckoutSessionParams{}
+	// fill the parameters of the checkout session
+	// that is to say which item are we going to sell, for which price, ...
+	params.SuccessURL = stripe.String(fmt.Sprintf("%s/success", s.frontendBaseUrl))
+	params.CancelURL = stripe.String(fmt.Sprintf("%s/cart", s.frontendBaseUrl))
+	params.Mode = stripe.String("payment")
+	params.LineItems = lines
+	params.ShippingAddressCollection = &stripe.CheckoutSessionShippingAddressCollectionParams{
+		AllowedCountries: []*string{
+			stripe.String("FR"), stripe.String("US"), stripe.String("DE"),
+		},
+	}
+
+	stripe.Key = s.stripeSecretKey
+	checkoutSession, err := session.New(&params)
+	if err != nil {
+		log.Printf("error while building the checkout session: %s", err)
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+	c.JSON(http.StatusOK, CheckoutOutput{SessionId: checkoutSession.ID})
 }
