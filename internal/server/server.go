@@ -2,7 +2,10 @@ package server
 
 import (
 	"fmt"
+	"log"
 	"net/http"
+
+	uuid "github.com/satori/go.uuid"
 
 	"github.com/maximilienandile/backend-go-tuto/internal/storage"
 
@@ -149,5 +152,19 @@ func (s *Server) Products(c *gin.Context) {
 }
 
 func (s *Server) CreateProduct(c *gin.Context) {
-	// TODO
+	var productToAdd product.Product
+	err := c.BindJSON(&productToAdd)
+	if err != nil {
+		log.Printf("error while binding JSON: %s \n", err)
+		return
+	}
+	productToAdd.ID = uuid.NewV4().String()
+	err = s.storage.CreateProduct(productToAdd)
+	if err != nil {
+		//
+		log.Printf("error occured while saving the product: %s \n", err)
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "impossible to persist product"})
+		return
+	}
+	c.JSON(http.StatusOK, productToAdd)
 }
