@@ -4,12 +4,12 @@ provider:
   runtime: go1.x
   region: eu-west-1
   environment:
-    FRONTEND_BASE_URL: ${opt:frontendBaseUrl}
-    ALLOWED_ORIGIN: ${opt:allowedOrigins}
-    PARAMETER_STORE_NAME: /ecommerce/${opt:stage}/secrets
-    EMAIL_FROM: ${opt:emailFrom}
-    ADMIN_EMAILS: ${opt:adminEmails}
-    DYNAMODB_TABLE_NAME: ecommerce-${opt:stage}
+    FRONTEND_BASE_URL: ${param:frontendBaseUrl,''}
+    ALLOWED_ORIGIN: ${param:allowedOrigins,''}
+    PARAMETER_STORE_NAME: /ecommerce/${opt:stage,''}/secrets
+    EMAIL_FROM: ${param:emailFrom,''}
+    ADMIN_EMAILS: ${param:adminEmails,''}
+    DYNAMODB_TABLE_NAME: ecommerce-${opt:stage,''}
   iam:
     role:
       statements:
@@ -26,7 +26,7 @@ provider:
               - - "arn:aws:dynamodb"
                 - Ref: "AWS::Region"
                 - Ref: "AWS::AccountId"
-                - table/ecommerce-${opt:stage}
+                - table/ecommerce-${opt:stage,''}
         - Effect: "Allow"
           Action:
             - "ssm:DescribeParameters"
@@ -37,7 +37,7 @@ provider:
               - - "arn:aws:ssm"
                 - Ref: "AWS::Region"
                 - Ref: "AWS::AccountId"
-                - parameter/ecommerce/${opt:stage}/secrets
+                - parameter/ecommerce/${opt:stage,''}/secrets
         - Effect: "Allow"
           Action:
             - "kms:Decrypt"
@@ -47,15 +47,11 @@ provider:
               - - "arn:aws:kms"
                 - Ref: "AWS::Region"
                 - Ref: "AWS::AccountId"
-                - key/${opt:ssmEncryptionKeyId}
+                - key/${param:ssmEncryptionKeyId,''}
         - Effect: "Allow"
           Action:
             - "ses:SendEmail"
           Resource: "*"
-  exclude:
-    - ./**
-  include:
-    - ./bin/**
 functions:
   hello:
     handler: bin/hello
@@ -158,3 +154,9 @@ functions:
       - http:
           path: /testEmail
           method: get
+package:
+  patterns:
+    # we exclude everything
+    - '!*/**'
+    # except: everything that is inside bin directory
+    - 'bin/*'
