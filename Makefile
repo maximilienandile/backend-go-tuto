@@ -14,22 +14,22 @@ deploy: build
 deploy_dev: build
 	serverless deploy \
 	--aws-profile maxaldtools  \
-	--allowedOrigins http://localhost:8080 \
+	--param="allowedOrigins=http://localhost:8080" \
 	--stage dev \
-	--ssmEncryptionKeyId 7a8dbbad-bae9-480c-af13-d7a14bb70a71 \
-	--frontendBaseUrl http://localhost:8080 \
-	--emailFrom maximilien.andile.demo@gmail.com \
-	--adminEmails maximilien.andile.demo@gmail.com
+	--param="ssmEncryptionKeyId=7a8dbbad-bae9-480c-af13-d7a14bb70a71" \
+	--param="frontendBaseUrl=http://localhost:8080" \
+	--param="emailFrom=maximilien.andile.demo@gmail.com" \
+	--param="adminEmails=maximilien.andile.demo@gmail.com"
 
 deploy_prod: build
 	serverless deploy \
 	--aws-profile maxaldtools  \
-	--allowedOrigins https://www.gopher-ecommerce.com,http://localhost:8080 \
+	--param="allowedOrigins=https://www.gopher-ecommerce.com,http://localhost:8080" \
 	--stage prod \
-	--ssmEncryptionKeyId 0370bb46-ea37-40fa-98f6-47af96d93599 \
-	--frontendBaseUrl https://gopher-ecommerce.com \
-	--emailFrom maximilien.andile.demo@gmail.com \
-	--adminEmails maximilien.andile.demo@gmail.com
+	--param="ssmEncryptionKeyId=0370bb46-ea37-40fa-98f6-47af96d93599" \
+	--param="frontendBaseUrl=https://gopher-ecommerce.com" \
+	--param="emailFrom=maximilien.andile.demo@gmail.com" \
+	--param="adminEmails=maximilien.andile.demo@gmail.com"
 
 genMocks:
 	mockgen -source=internal/storage/interface.go -destination=internal/storage/mock.go -package=storage
